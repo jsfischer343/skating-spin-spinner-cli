@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SPINPOSITION_HH_
 #define SPINPOSITION_HH_
 

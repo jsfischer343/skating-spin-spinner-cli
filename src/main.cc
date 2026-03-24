@@ -63,7 +63,7 @@ void validateInput(ap::argmap& args)
 
     if(!spinTypeValid || !levelValid || !numberValid)
     {
-        std::cout << "Invalid arguments. Use -h flag for more information.";
+        std::cout << "Invalid arguments. Use -h flag for more information.\n";
         exit(1);
     }
     return;
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     ap::argmap args = p.parse();
 
     if (!args.parsed_successfully()) {
-        std::cerr << "Arguments unsuccessfully parsed\n";
+        std::cout << "Invalid arguments. Use -h flag for more information.\n";
         return 1;
     }
 

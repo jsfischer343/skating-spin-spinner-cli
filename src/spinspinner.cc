@@ -40,9 +40,9 @@ std::string SpinSpinner::spin(int level)
             throw;
     }
 }
-std::string SpinSpinner::spin(char spinType, int level)
+std::string SpinSpinner::spin(char type, int level)
 {
-    switch(spinType)
+    switch(type)
     {
         case 'c':
             return spin_spinInOnePosition('c',level);
@@ -59,9 +59,9 @@ std::string SpinSpinner::spin(char spinType, int level)
     }
 }
 
-std::string SpinSpinner::spin_spinInOnePosition(char spinType, int level)
+std::string SpinSpinner::spin_spinInOnePosition(char type, int level)
 {
-    Spin newSpin = Spin(spinType);
+    Spin newSpin = Spin(type);
     spin_decideRandomBaseQualities(newSpin);
 
     //randomly decide if it will be a forward to back spin or back spin to forward spin
@@ -69,24 +69,24 @@ std::string SpinSpinner::spin_spinInOnePosition(char spinType, int level)
     {
         if(easyRandom::range(0,1))
         {
-            newSpin.spinPositions.push_back(SpinPosition(spinType,'b'));
-            newSpin.spinPositions.push_back(SpinPosition(spinType,'f'));
+            newSpin.spinPositions.push_back(SpinPosition(type,'b'));
+            newSpin.spinPositions.push_back(SpinPosition(type,'f'));
         }
         else
         {
-            newSpin.spinPositions.push_back(SpinPosition(spinType,'f'));
-            newSpin.spinPositions.push_back(SpinPosition(spinType,'b'));
+            newSpin.spinPositions.push_back(SpinPosition(type,'f'));
+            newSpin.spinPositions.push_back(SpinPosition(type,'b'));
         }
     }
     else
     {
         if(easyRandom::range(0,1))
         {
-            newSpin.spinPositions.push_back(SpinPosition(spinType,'b'));
+            newSpin.spinPositions.push_back(SpinPosition(type,'b'));
         }
         else
         {
-            newSpin.spinPositions.push_back(SpinPosition(spinType,'f'));
+            newSpin.spinPositions.push_back(SpinPosition(type,'f'));
         }
     }
     //add levels
@@ -323,7 +323,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
 {
     if(newSpin.level==0) //increasing from level 1->2
     {
-        int tempRandomSelect = easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB});
+        int tempRandomSelect = spin_addLevelRandomly_pickRandomAddition(newSpin);
         if(tempRandomSelect==0)
         {
             //add variation
@@ -386,33 +386,44 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
             newSpin.level++;
             return;
         }
-        else if(tempRandomSelect==3 && newSpin.baseType=='k')
+        else if(tempRandomSelect==3) //only occurs in combo spins (see pickRandomAddition sub-function for logic)
         {
             //add intermediate position
             int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
             newSpin.spinPositions.insert(newSpin.spinPositions.begin()+tempRandomPositionIndex+1,SpinPosition('i',newSpin.spinPositions.at(tempRandomPositionIndex).footness));
+            newSpin.hasIntermediatePositionFlag = true;
+            newSpin.level++;
+            return;
         }
         else
-            throw; //implies that tempRandomSelect was somehow set outside of [0,3]
+            throw; //implies that tempRandomSelect is outside of possible spin additions (this would be a bug)
     }
     else if(newSpin.level==1 || newSpin.level==2) //increasing to level 2 and 3 is relatively similar but requires checks for conflicts (current implementation of "checks" just means re-roll until it doesn't conflict)
     {
-        while(true) //keep looping until the rolled "spin addition" (variation/features) doesn't conflict with any other additions
+        while(true) //keep looping until the rolled "spin addition" (variation/features) doesn't conflict with any other additions (lazy implementation)
         {
-            int tempRandomSelect = easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB});
+            int tempRandomSelect = spin_addLevelRandomly_pickRandomAddition(newSpin);
             if(tempRandomSelect==0)
             {
                 //add variation
-                int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
-                char randomVariation = SpinPosition::pickRandomVariation(newSpin.spinPositions.at(tempRandomPositionIndex).position);
-                if(newSpin.positionVariationUsed(newSpin.spinPositions.at(tempRandomPositionIndex).position,randomVariation)) //if it is already used then re-roll selection of type of "spin addition"
-                    tempRandomSelect = easyRandom::range(0,3);
+                if(newSpin.hasTwoVariationsFlag)
+                    continue;
                 else
                 {
-                    newSpin.spinPositions.at(tempRandomPositionIndex).variation = randomVariation;
-                    newSpin.level++;
-                    return;
+                    int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
+                    char randomVariation = SpinPosition::pickRandomVariation(newSpin.spinPositions.at(tempRandomPositionIndex).position);
+                    if(newSpin.positionVariationUsed(newSpin.spinPositions.at(tempRandomPositionIndex).position,randomVariation)) //if it is already used then re-roll selection of type of "spin addition"
+                        continue;
+                    else
+                    {
+                        newSpin.spinPositions.at(tempRandomPositionIndex).variation = randomVariation;
+                        if(newSpin.hasTwoVariations())
+                            newSpin.hasTwoVariationsFlag = true;
+                        newSpin.level++;
+                        return;
+                    }
                 }
+
             }
             else if(tempRandomSelect==1)
             {
@@ -461,39 +472,52 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     return;
                 }
                 else
-                    tempRandomSelect = easyRandom::range(0,3);
+                    continue;
             }
             else if(tempRandomSelect==2)
             {
                 //add position feature
-                int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
                 char randomFeature = SpinPosition::pickRandomFeature();
                 if(newSpin.positionFeatureUsed(randomFeature))
-                    tempRandomSelect = easyRandom::range(0,3);
+                    continue;
                 else
                 {
+                    int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
                     newSpin.spinPositions.at(tempRandomPositionIndex).features.push_back(randomFeature);
                     newSpin.level++;
                     return;
                 }
             }
-            else if(tempRandomSelect==3 && newSpin.baseType=='k')
+            else if(tempRandomSelect==3) //only occurs in combo spins (see pickRandomAddition sub-function for logic)
             {
                 //add intermediate position
-                int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
-                if(newSpin.hasIntermediatePosition())
-                    tempRandomSelect = easyRandom::range(0,3);
+                if(newSpin.hasIntermediatePositionFlag)
+                    continue;
                 else
+                {
+                    int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
                     newSpin.spinPositions.insert(newSpin.spinPositions.begin()+tempRandomPositionIndex+1,SpinPosition('i',newSpin.spinPositions.at(tempRandomPositionIndex).footness));
+                    newSpin.hasIntermediatePositionFlag = true;
+                    newSpin.level++;
+                    return;
+                }
             }
             else
-                throw; //implies that tempRandomSelect was somehow set outside of [0,3]
+                throw; //implies that tempRandomSelect is outside of possible spin additions (this would be a bug)
         }
     }
     else if(newSpin.level==4) //level four spins have extra special rules because reasons
     {
 
     }
+}
+int SpinSpinner::spin_addLevelRandomly_pickRandomAddition(Spin& newSpin)
+{
+    //0: difficult variation, 1: spin feature, 2: position feature, 3: intermediate position
+    if(newSpin.baseType=='k')
+        return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB});
+    else
+        return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB});
 }
 bool SpinSpinner::spin_checkForDifficultChangeOfPosition(Spin& newSpin)
 {
@@ -521,7 +545,7 @@ std::string SpinSpinner::spinHistoryToString()
     std::string historyString = "";
     for(int i=0;i<spinHistory.size();i++)
     {
-        historyString += spinHistory.at(i).toString();
+        historyString += spinHistory.at(i).toString()+"\n";
     }
     return historyString;
 }

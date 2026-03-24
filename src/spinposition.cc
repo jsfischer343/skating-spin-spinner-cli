@@ -8,43 +8,43 @@ SpinPosition::SpinPosition(char position, char footness)
 
 std::string SpinPosition::getPositionString() const
 {
-    if(this->position=='c')
+    if(position=='c')
         return "camel";
-    else if(this->position=='s')
+    else if(position=='s')
         return "sit";
-    else if(this->position=='u')
+    else if(position=='u')
         return "upright";
-    else if(this->position=='l')
+    else if(position=='l')
         return "layback";
-    else if(this->position=='i')
+    else if(position=='i')
         return "intermediate";
     return "";
 }
 std::string SpinPosition::getDirectionString() const
 {
-    if(this->direction=='r')
+    if(direction=='r')
         return "ccw";
-    else if(this->direction=='l')
+    else if(direction=='l')
         return "cw";
     return "";
 }
 std::string SpinPosition::getFootnessString() const
 {
-    if(this->footness=='b')
+    if(footness=='b')
         return "back";
-    else if(this->footness=='f')
+    else if(footness=='f')
         return "forward";
     return "";
 }
 std::string SpinPosition::getVariationString() const
 {
-    if(this->variation=='u')
+    if(variation=='u')
         return "up";
-    else if(this->variation=='f')
+    else if(variation=='f')
         return "front";
-    else if(this->variation=='b')
+    else if(variation=='b')
         return "behind";
-    else if(this->variation=='s')
+    else if(variation=='s')
         return "side";
     return "";
 }
@@ -53,15 +53,15 @@ std::string SpinPosition::getFeatureString() const
     std::string featureString = "";
     for(int i=0;i<features.size();i++)
     {
-        if(this->features.at(i)=='b')
+        if(features.at(i)=='b')
             featureString += "blade";
-        else if(this->features.at(i)=='c')
+        else if(features.at(i)=='c')
             featureString += "coe";
-        else if(this->features.at(i)=='j')
+        else if(features.at(i)=='j')
             featureString += "jump";
-        else if(this->features.at(i)=='8')
+        else if(features.at(i)=='8')
             featureString += "8revs";
-        else if(this->features.at(i)=='s')
+        else if(features.at(i)=='s')
             featureString += "speed";
         if(i!=features.size()-1)
             featureString += ", ";

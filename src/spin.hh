@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SPIN_HH_
 #define SPIN_HH_
 
@@ -27,14 +28,18 @@ class Spin
         } SpinFeatures;
         SpinFeatures spinFeatures;
 
+        //flags
+        bool hasIntermediatePositionFlag = false;
+        bool hasTwoVariationsFlag = false; //only the first two difficult variations count towards levels
 
         Spin(char baseType);
 
-        bool positionVariationUsed(char positionChar, char variationChar); //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
-        bool positionFeatureUsed(char featureChar);
-        bool hasIntermediatePosition();
-        std::string toString();
-            std::pair<std::string,int> toString_part(int startIndex);
+        bool positionVariationUsed(char positionChar, char variationChar) const; //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
+        bool positionFeatureUsed(char featureChar) const;
+        bool hasTwoVariations() const;
+        std::string toString() const;
+    private:
+            std::pair<std::string,int> toString_part(int startIndex) const;
 };
 
 #endif

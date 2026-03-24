@@ -1,3 +1,4 @@
+#pragma once
 #ifndef SPINSPINNER_HH_
 #define SPINSPINNER_HH_
 
@@ -22,7 +23,7 @@
 #define ADD_VARIATION_PROB 0.3
 #define ADD_SPIN_FEATURE_PROB 0.25
 #define ADD_POSITION_FEATURE_PROB 0.25
-#define ADD_INTERMEDIATE_POSITION_PROB 0.2
+#define ADD_INTERMEDIATE_POSITION_PROB 0.2 //only affects combo spins
 
 #include <algorithm>
 #include <string>
@@ -45,6 +46,7 @@ class SpinSpinner
                 bool spin_combo_hasAllRequiredPositions(Spin& newSpin);
             void spin_decideRandomBaseQualities(Spin& newSpin);
             void spin_addLevelRandomly(Spin& newSpin);
+                int spin_addLevelRandomly_pickRandomAddition(Spin& newSpin);
             bool spin_checkForDifficultChangeOfPosition(Spin& newSpin);
 
     public:
