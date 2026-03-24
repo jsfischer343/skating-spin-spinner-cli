@@ -21,51 +21,51 @@ std::string SpinSpinner::spin()
             throw;
     }
 }
-std::string SpinSpinner::spin(int spinLevel)
+std::string SpinSpinner::spin(int level)
 {
     int tempRandomSelect = easyRandom::range(0,4);
     switch(tempRandomSelect)
     {
         case 0:
-            return spin_spinInOnePosition('c',spinLevel);
+            return spin_spinInOnePosition('c',level);
         case 1:
-            return spin_spinInOnePosition('s',spinLevel);
+            return spin_spinInOnePosition('s',level);
         case 2:
-            return spin_spinInOnePosition('u',spinLevel);
+            return spin_spinInOnePosition('u',level);
         case 3:
-            return spin_spinInOnePosition('l',spinLevel);
+            return spin_spinInOnePosition('l',level);
         case 4:
-            return spin_combo(spinLevel);
+            return spin_combo(level);
         default:
             throw;
     }
 }
-std::string SpinSpinner::spin(char spinType, int spinLevel)
+std::string SpinSpinner::spin(char spinType, int level)
 {
     switch(spinType)
     {
         case 'c':
-            return spin_spinInOnePosition('c',spinLevel);
+            return spin_spinInOnePosition('c',level);
         case 's':
-            return spin_spinInOnePosition('s',spinLevel);
+            return spin_spinInOnePosition('s',level);
         case 'u':
-            return spin_spinInOnePosition('u',spinLevel);
+            return spin_spinInOnePosition('u',level);
         case 'l':
-            return spin_spinInOnePosition('l',spinLevel);
+            return spin_spinInOnePosition('l',level);
         case 'k':
-            return spin_combo(spinLevel);
+            return spin_combo(level);
         default:
             throw;
     }
 }
 
-std::string SpinSpinner::spin_spinInOnePosition(char spinType, int spinLevel)
+std::string SpinSpinner::spin_spinInOnePosition(char spinType, int level)
 {
     Spin newSpin = Spin(spinType);
     spin_decideRandomBaseQualities(newSpin);
 
     //randomly decide if it will be a forward to back spin or back spin to forward spin
-    if(newSpin.isChangeFootSpin)
+    if(newSpin.isChangeFoot)
     {
         if(easyRandom::range(0,1))
         {
@@ -90,7 +90,7 @@ std::string SpinSpinner::spin_spinInOnePosition(char spinType, int spinLevel)
         }
     }
     //add levels
-    for(int i=0;i<spinLevel;i++)
+    for(int i=0;i<level;i++)
         spin_addLevelRandomly(newSpin);
 
     //record spin
@@ -98,7 +98,7 @@ std::string SpinSpinner::spin_spinInOnePosition(char spinType, int spinLevel)
     //get string representation of spin
     return newSpin.toString();
 }
-std::string SpinSpinner::spin_combo(int spinLevel)
+std::string SpinSpinner::spin_combo(int level)
 {
     Spin newSpin = Spin('k');
     spin_decideRandomBaseQualities(newSpin);
@@ -106,7 +106,7 @@ std::string SpinSpinner::spin_combo(int spinLevel)
     //pick first position
     char tempRandomStartPosition;
     int tempRandomSelect;
-    if(spinLevel<1)
+    if(level<1)
         tempRandomSelect = 2;
     else
         tempRandomSelect = easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2},std::vector<double>{COMBO_START_UPRIGHT_PROB,COMBO_START_SIT_PROB,COMBO_START_CAMEL_PROB});
@@ -127,7 +127,7 @@ std::string SpinSpinner::spin_combo(int spinLevel)
     //push first position
     newSpin.spinPositions.push_back(SpinPosition(tempRandomStartPosition,tempRandomFootness));
 
-    if(newSpin.isChangeFootSpin)
+    if(newSpin.isChangeFoot)
     {
         bool endSpinBool = false; //randomly turned true to end the spin early (i.e. less than 6 positions)
         bool swappedFeet = false;
@@ -149,17 +149,17 @@ std::string SpinSpinner::spin_combo(int spinLevel)
                 {
                     secondFootStartPoint = newSpin.spinPositions.size();
                     swappedFeet = true;
-                    spin_combo_addComboPosition(newSpin,secondFoot,secondFootStartPoint,spinLevel);
+                    spin_combo_addComboPosition(newSpin,secondFoot,secondFootStartPoint,level);
                     secondFootCounter++;
                 }
                 else
                 {
-                    spin_combo_addComboPosition(newSpin,firstFoot,0,spinLevel);
+                    spin_combo_addComboPosition(newSpin,firstFoot,0,level);
                 }
             }
             else
             {
-                spin_combo_addComboPosition(newSpin,secondFoot,secondFootStartPoint,spinLevel);
+                spin_combo_addComboPosition(newSpin,secondFoot,secondFootStartPoint,level);
                 secondFootCounter++;
                 if(spin_combo_hasAllRequiredPositions(newSpin))
                 {
@@ -177,20 +177,20 @@ std::string SpinSpinner::spin_combo(int spinLevel)
     }
     else
     {
-        spin_combo_addComboPosition(newSpin,tempRandomFootness,0,spinLevel); //add two last positions on same foot
-        spin_combo_addComboPosition(newSpin,tempRandomFootness,0,spinLevel);
+        spin_combo_addComboPosition(newSpin,tempRandomFootness,0,level); //add two last positions on same foot
+        spin_combo_addComboPosition(newSpin,tempRandomFootness,0,level);
     }
     //check for difficult change of position
-    if(spinLevel>=1)
+    if(level>=1)
     {
         if(spin_checkForDifficultChangeOfPosition(newSpin))
         {
-            newSpin.spinLevel++;
-            spinLevel--;
+            newSpin.level++;
+            level--;
         }
     }
     //add levels
-    for(int i=0;i<spinLevel;i++)
+    for(int i=0;i<level;i++)
         spin_addLevelRandomly(newSpin);
 
     //record spin
@@ -198,14 +198,14 @@ std::string SpinSpinner::spin_combo(int spinLevel)
     //get string representation of spin
     return newSpin.toString();
 }
-void SpinSpinner::spin_combo_addComboPosition(Spin& newSpin, char footness, int startPoint, int spinLevel)
+void SpinSpinner::spin_combo_addComboPosition(Spin& newSpin, char footness, int startPoint, int level)
 {
     if(startPoint+3<=newSpin.spinPositions.size()) //if this is true then it would imply that we are trying to add a 4th position to the same foot which wouldn't make sense
     {
         throw;
     }
 
-    if(spinLevel>=1) //combo spins that are level 1 or higher can have a difficult change of position so the logic is more lax (i.e. there is more rolling of random numbers)
+    if(level>=1) //combo spins that are level 1 or higher can have a difficult change of position so the logic is more lax (i.e. there is more rolling of random numbers)
     {
         std::vector<char> validPositions = {'c','s','u'};
         std::vector<char> usedPositions = {};
@@ -283,45 +283,45 @@ void SpinSpinner::spin_decideRandomBaseQualities(Spin& newSpin)
 {
     double changeFootSpinProb;
     double flyingFootSpinProb;
-    if(newSpin.spinBaseType=='c')
+    if(newSpin.baseType=='c')
     {
         changeFootSpinProb = CAMEL_CHANGEFOOTSPIN_PROB;
         flyingFootSpinProb = CAMEL_FLYINGSPIN_PROB;
     }
-    else if(newSpin.spinBaseType=='s')
+    else if(newSpin.baseType=='s')
     {
         changeFootSpinProb = SIT_CHANGEFOOTSPIN_PROB;
         flyingFootSpinProb = SIT_FLYINGSPIN_PROB;
     }
-    else if(newSpin.spinBaseType=='u')
+    else if(newSpin.baseType=='u')
     {
         changeFootSpinProb = UPRIGHT_CHANGEFOOTSPIN_PROB;
         flyingFootSpinProb = UPRIGHT_FLYINGSPIN_PROB;
     }
-    else if(newSpin.spinBaseType=='l')
+    else if(newSpin.baseType=='l')
     {
         changeFootSpinProb = LAYBACK_CHANGEFOOTSPIN_PROB;
         flyingFootSpinProb = LAYBACK_FLYINGSPIN_PROB;
     }
-    else if(newSpin.spinBaseType=='k')
+    else if(newSpin.baseType=='k')
     {
         changeFootSpinProb = COMBO_CHANGEFOOTSPIN_PROB;
         flyingFootSpinProb = COMBO_FLYINGSPIN_PROB;
     }
 
     if(easyRandom::weightedTruth(changeFootSpinProb))
-        newSpin.isChangeFootSpin = true;
+        newSpin.isChangeFoot = true;
     else
-        newSpin.isChangeFootSpin = false;
+        newSpin.isChangeFoot = false;
 
     if(easyRandom::weightedTruth(flyingFootSpinProb))
-        newSpin.isFlyingSpin = true;
+        newSpin.isFlying = true;
     else
-        newSpin.isFlyingSpin = false;
+        newSpin.isFlying = false;
 }
 void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
 {
-    if(newSpin.spinLevel==0) //increasing from level 1->2
+    if(newSpin.level==0) //increasing from level 1->2
     {
         int tempRandomSelect = easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB});
         if(tempRandomSelect==0)
@@ -330,7 +330,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
             int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
             char randomVariation = SpinPosition::pickRandomVariation(newSpin.spinPositions.at(tempRandomPositionIndex).position);
             newSpin.spinPositions.at(tempRandomPositionIndex).variation = randomVariation;
-            newSpin.spinLevel++;
+            newSpin.level++;
             return;
         }
         else if(tempRandomSelect==1)
@@ -339,40 +339,40 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
             int tempRandomSelect;
             int tempLowerRandomRange = 1;
             int tempUpperRandomRange = 2;
-            if(newSpin.isChangeFootSpin)
+            if(newSpin.isChangeFoot)
                 tempLowerRandomRange--;
-            if(newSpin.spinBaseType=='l')
+            if(newSpin.baseType=='l')
                 tempUpperRandomRange = 4;
 
             tempRandomSelect = easyRandom::range(tempLowerRandomRange,tempUpperRandomRange);
             if(tempRandomSelect==0) //changeFootByJump
             {
                 newSpin.spinFeatures.changeFootByJump = true;
-                newSpin.spinLevel++;
+                newSpin.level++;
                 return;
             }
             else if(tempRandomSelect==1) //difficultEntrance
             {
                 newSpin.spinFeatures.difficultEntrance = true;
-                newSpin.spinLevel++;
+                newSpin.level++;
                 return;
             }
             else if(tempRandomSelect==2) //difficultExit
             {
                 newSpin.spinFeatures.difficultExit = true;
-                newSpin.spinLevel++;
+                newSpin.level++;
                 return;
             }
             else if(tempRandomSelect==3) //laybackTransition
             {
                 newSpin.spinFeatures.laybackTransition = true;
-                newSpin.spinLevel++;
+                newSpin.level++;
                 return;
             }
             else if(tempRandomSelect==4) //biellmann after layback
             {
                 newSpin.spinFeatures.biellmannAfterLayback = true;
-                newSpin.spinLevel++;
+                newSpin.level++;
                 return;
             }
 
@@ -383,10 +383,10 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
             int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
             char randomFeature = SpinPosition::pickRandomFeature();
             newSpin.spinPositions.at(tempRandomPositionIndex).features.push_back(randomFeature);
-            newSpin.spinLevel++;
+            newSpin.level++;
             return;
         }
-        else if(tempRandomSelect==3 && newSpin.spinBaseType=='k')
+        else if(tempRandomSelect==3 && newSpin.baseType=='k')
         {
             //add intermediate position
             int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
@@ -395,7 +395,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
         else
             throw; //implies that tempRandomSelect was somehow set outside of [0,3]
     }
-    else if(newSpin.spinLevel==1 || newSpin.spinLevel==2) //increasing to level 2 and 3 is relatively similar but requires checks for conflicts (current implementation of "checks" just means re-roll until it doesn't conflict)
+    else if(newSpin.level==1 || newSpin.level==2) //increasing to level 2 and 3 is relatively similar but requires checks for conflicts (current implementation of "checks" just means re-roll until it doesn't conflict)
     {
         while(true) //keep looping until the rolled "spin addition" (variation/features) doesn't conflict with any other additions
         {
@@ -405,12 +405,12 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                 //add variation
                 int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
                 char randomVariation = SpinPosition::pickRandomVariation(newSpin.spinPositions.at(tempRandomPositionIndex).position);
-                if(newSpin.positionVariationUsedInSpin(newSpin.spinPositions.at(tempRandomPositionIndex).position,randomVariation)) //if it is already used then re-roll selection of type of "spin addition"
+                if(newSpin.positionVariationUsed(newSpin.spinPositions.at(tempRandomPositionIndex).position,randomVariation)) //if it is already used then re-roll selection of type of "spin addition"
                     tempRandomSelect = easyRandom::range(0,3);
                 else
                 {
                     newSpin.spinPositions.at(tempRandomPositionIndex).variation = randomVariation;
-                    newSpin.spinLevel++;
+                    newSpin.level++;
                     return;
                 }
             }
@@ -420,16 +420,16 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                 int tempRandomSelect2;
                 int tempLowerRandomRange = 1;
                 int tempUpperRandomRange = 2;
-                if(newSpin.isChangeFootSpin)
+                if(newSpin.isChangeFoot)
                     tempLowerRandomRange--;
-                if(newSpin.spinBaseType=='l')
+                if(newSpin.baseType=='l')
                     tempUpperRandomRange = 4;
 
                 tempRandomSelect2 = easyRandom::range(tempLowerRandomRange,tempUpperRandomRange);
                 if(tempRandomSelect2==0 && !newSpin.spinFeatures.changeFootByJump) //changeFootByJump
                 {
                     newSpin.spinFeatures.changeFootByJump = true;
-                    newSpin.spinLevel++;
+                    newSpin.level++;
                     return;
                 }
                 else if(tempRandomSelect2==1 &&
@@ -437,7 +437,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                 !newSpin.spinFeatures.difficultEntrance) //difficultEntrance
                 {
                     newSpin.spinFeatures.difficultEntrance = true;
-                    newSpin.spinLevel++;
+                    newSpin.level++;
                     return;
                 }
                 else if(tempRandomSelect2==2 &&
@@ -445,19 +445,19 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                 !newSpin.spinFeatures.difficultEntrance) //difficultExit
                 {
                     newSpin.spinFeatures.difficultExit = true;
-                    newSpin.spinLevel++;
+                    newSpin.level++;
                     return;
                 }
                 else if(tempRandomSelect2==3 && !newSpin.spinFeatures.laybackTransition) //laybackTransition
                 {
                     newSpin.spinFeatures.laybackTransition = true;
-                    newSpin.spinLevel++;
+                    newSpin.level++;
                     return;
                 }
                 else if(tempRandomSelect2==4 && !newSpin.spinFeatures.biellmannAfterLayback) //biellmann after layback
                 {
                     newSpin.spinFeatures.biellmannAfterLayback = true;
-                    newSpin.spinLevel++;
+                    newSpin.level++;
                     return;
                 }
                 else
@@ -468,16 +468,16 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                 //add position feature
                 int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
                 char randomFeature = SpinPosition::pickRandomFeature();
-                if(newSpin.positionFeatureUsedInSpin(randomFeature))
+                if(newSpin.positionFeatureUsed(randomFeature))
                     tempRandomSelect = easyRandom::range(0,3);
                 else
                 {
                     newSpin.spinPositions.at(tempRandomPositionIndex).features.push_back(randomFeature);
-                    newSpin.spinLevel++;
+                    newSpin.level++;
                     return;
                 }
             }
-            else if(tempRandomSelect==3 && newSpin.spinBaseType=='k')
+            else if(tempRandomSelect==3 && newSpin.baseType=='k')
             {
                 //add intermediate position
                 int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
@@ -490,7 +490,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                 throw; //implies that tempRandomSelect was somehow set outside of [0,3]
         }
     }
-    else if(newSpin.spinLevel==4) //level four spins have extra special rules because reasons
+    else if(newSpin.level==4) //level four spins have extra special rules because reasons
     {
 
     }

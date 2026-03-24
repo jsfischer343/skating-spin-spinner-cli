@@ -10,10 +10,10 @@ class Spin
 {
     public:
         //Base spin qualities
-        char spinBaseType = -1; //camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; combo -> 'k'
-        bool isFlyingSpin = false;
-        bool isChangeFootSpin = false;
-        int spinLevel = 0;
+        char baseType = -1; //camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; combo -> 'k'
+        bool isFlying = false;
+        bool isChangeFoot = false;
+        int level = 0;
         std::vector<SpinPosition> spinPositions;
 
         //spin features
@@ -28,10 +28,10 @@ class Spin
         SpinFeatures spinFeatures;
 
 
-        Spin(char spinBaseType);
+        Spin(char baseType);
 
-        bool positionVariationUsedInSpin(char positionChar, char variationChar); //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
-        bool positionFeatureUsedInSpin(char featureChar);
+        bool positionVariationUsed(char positionChar, char variationChar); //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
+        bool positionFeatureUsed(char featureChar);
         bool hasIntermediatePosition();
         std::string toString();
             std::pair<std::string,int> toString_part(int startIndex);

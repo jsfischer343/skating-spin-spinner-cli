@@ -33,7 +33,7 @@ namespace ap {
             : args(args)
             , success(success) {}
 
-        const std::string& operator[](const std::string& argstr) {
+        std::string& operator[](const std::string& argstr) {
             return args[argstr];
         }
 

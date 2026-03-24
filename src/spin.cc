@@ -1,8 +1,8 @@
 #include "spin.hh"
 
-Spin::Spin(char spinBaseType)
+Spin::Spin(char baseType)
 {
-    this->spinBaseType = spinBaseType;
+    this->baseType = baseType;
 }
 
 std::string Spin::toString()
@@ -12,22 +12,22 @@ std::string Spin::toString()
         return spinString;
 
     //declare this spin's level
-    if(this->spinLevel==0)
+    if(this->level==0)
         spinString += "Base: ";
-    else if(this->spinLevel==1)
+    else if(this->level==1)
         spinString += "Level 1: ";
-    else if(this->spinLevel==2)
+    else if(this->level==2)
         spinString += "Level 2: ";
-    else if(this->spinLevel==3)
+    else if(this->level==3)
         spinString += "Level 3: ";
-    else if(this->spinLevel==4)
+    else if(this->level==4)
         spinString += "Level 4: ";
 
     //starting direction of spin
     spinString += "("+this->spinPositions.at(0).getDirectionString()+")[\t";
 
     //is flying spin?
-    if(this->isFlyingSpin)
+    if(this->isFlying)
         spinString += "flying ";
 
     spinString += this->spinPositions.at(0).getFootnessString()+" ";
@@ -64,7 +64,7 @@ std::string Spin::toString()
     return spinString;
 }
 
-bool Spin::positionVariationUsedInSpin(char positionChar, char variationChar)
+bool Spin::positionVariationUsed(char positionChar, char variationChar)
 {
     for(int i=0;i<this->spinPositions.size();i++)
     {
@@ -73,7 +73,7 @@ bool Spin::positionVariationUsedInSpin(char positionChar, char variationChar)
     }
     return false;
 }
-bool Spin::positionFeatureUsedInSpin(char featureChar)
+bool Spin::positionFeatureUsed(char featureChar)
 {
     for(int i=0;i<this->spinPositions.size();i++)
     {
