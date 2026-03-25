@@ -29,6 +29,8 @@ class SpinPosition
 
         SpinPosition(char position, char footness);
 
+        void swapDirection();
+
         std::string getPositionString() const;
         std::string getDirectionString() const;
         std::string getFootnessString() const;

@@ -38,7 +38,17 @@ bool Spin::hasTwoVariations() const
         return true;
     return false;
 }
-
+int Spin::getChangeOfFootIndex() const
+{
+    for(int i=1;i<spinPositions.size();i++)
+    {
+        if(spinPositions.at(i-1).footness!=spinPositions.at(i).footness)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
 std::string Spin::toString() const
 {
     std::string spinString = "";

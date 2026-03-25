@@ -31,12 +31,14 @@ class Spin
         //flags
         bool hasIntermediatePositionFlag = false;
         bool hasTwoVariationsFlag = false; //only the first two difficult variations count towards levels
+        bool hasChangeDirectionFlag = false;
 
         Spin(char baseType);
 
         bool positionVariationUsed(char positionChar, char variationChar) const; //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
         bool positionFeatureUsed(char featureChar) const;
         bool hasTwoVariations() const;
+        int getChangeOfFootIndex() const;
         std::string toString() const;
     private:
             std::pair<std::string,int> toString_part(int startIndex) const;

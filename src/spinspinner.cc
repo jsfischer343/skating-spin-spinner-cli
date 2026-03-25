@@ -395,6 +395,15 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
             newSpin.level++;
             return;
         }
+        else if(tempRandomSelect==4) //change of direction (only for change foot spins)
+        {
+            int changeFootIndex = newSpin.getChangeOfFootIndex();
+            for(int i=changeFootIndex;i<newSpin.spinPositions.size();i++)
+                newSpin.spinPositions.at(i).swapDirection();
+            newSpin.hasChangeDirectionFlag = true;
+            newSpin.level++;
+            return;
+        }
         else
             throw; //implies that tempRandomSelect is outside of possible spin additions (this would be a bug)
     }
@@ -502,6 +511,20 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     return;
                 }
             }
+            else if(tempRandomSelect==4) //change of direction (only for change foot spins)
+            {
+                if(newSpin.hasChangeDirectionFlag)
+                    continue;
+                else
+                {
+                    int changeFootIndex = newSpin.getChangeOfFootIndex();
+                    for(int i=changeFootIndex;i<newSpin.spinPositions.size();i++)
+                        newSpin.spinPositions.at(i).swapDirection();
+                    newSpin.hasChangeDirectionFlag = true;
+                    newSpin.level++;
+                    return;
+                }
+            }
             else
                 throw; //implies that tempRandomSelect is outside of possible spin additions (this would be a bug)
         }
@@ -515,9 +538,19 @@ int SpinSpinner::spin_addLevelRandomly_pickRandomAddition(Spin& newSpin)
 {
     //0: difficult variation, 1: spin feature, 2: position feature, 3: intermediate position
     if(newSpin.baseType=='k')
-        return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB});
+    {
+        if(newSpin.isChangeFoot)
+            return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3,4},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB,ADD_CHANGE_OF_DIRECTION_PROB});
+        else
+            return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB});
+    }
     else
-        return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB});
+    {
+        if(newSpin.isChangeFoot)
+            return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,4},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_CHANGE_OF_DIRECTION_PROB});
+        else
+            return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB});
+    }
 }
 bool SpinSpinner::spin_checkForDifficultChangeOfPosition(Spin& newSpin)
 {

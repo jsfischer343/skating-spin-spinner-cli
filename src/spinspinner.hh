@@ -21,9 +21,10 @@
 
 //Probablities for spin bullets
 #define ADD_VARIATION_PROB 0.3
-#define ADD_SPIN_FEATURE_PROB 0.25
-#define ADD_POSITION_FEATURE_PROB 0.25
-#define ADD_INTERMEDIATE_POSITION_PROB 0.2 //only affects combo spins
+#define ADD_SPIN_FEATURE_PROB 0.2
+#define ADD_POSITION_FEATURE_PROB 0.2
+#define ADD_INTERMEDIATE_POSITION_PROB 0.15 //only affects combo spins
+#define ADD_CHANGE_OF_DIRECTION_PROB 0.15
 
 #include <algorithm>
 #include <string>

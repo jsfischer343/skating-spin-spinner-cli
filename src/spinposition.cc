@@ -5,7 +5,13 @@ SpinPosition::SpinPosition(char position, char footness)
     this->position = position;
     this->footness = footness;
 }
-
+void SpinPosition::swapDirection()
+{
+    if(direction=='r')
+        direction='l';
+    else if(direction=='l')
+        direction='r';
+}
 std::string SpinPosition::getPositionString() const
 {
     if(position=='c')
