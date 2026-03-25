@@ -26,12 +26,14 @@ class Spin
         SpinFeatures features;
 
         //flags
-        bool hasIntermediatePositionFlag = false;
-        bool hasTwoVariationsFlag = false; //only the first two difficult variations count towards levels
-        bool hasChangeDirectionFlag = false;
+        bool intermediatePositionFlag = false;
+        bool twoVariationsFlag = false; //only the first two difficult variations count towards levels
+        bool changeDirectionFlag = false;
 
         Spin(char baseType);
 
+        bool hasAllPrimaryPositions() const; //for use when validating combo spins
+        int getTotalPositions() const;
         bool variationUsed(char positionChar, char variationChar) const; //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
         bool featureUsed(char featureChar) const;
         bool hasTwoVariations() const;

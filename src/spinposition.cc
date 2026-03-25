@@ -66,30 +66,47 @@ bool SpinPosition::hasFeature() const
         return false;
     return true;
 }
-char SpinPosition::pickRandomFeature()
+bool SpinPosition::pickRandomFeature() const
 {
     std::vector<char> validFeatures = {'b','c','j','8','s'};
-    return easyRandom::pickFromVector(validFeatures);
+    std::vector<char> usedFeatures = features;
+    std::vector<char> unusedFeatures;
+    std::sort(validFeatures.begin(),validFeatures.end());
+    std::sort(usedFeatures.begin(),usedFeatures.end());
+    std::set_difference(validFeatures.begin(),validFeatures.end(),usedFeatures.begin(),usedFeatures.end(),std::back_inserter(unusedFeatures));
+    if(unusedFeatures.empty())
+        return -1;
+    else
+        return easyRandom::pickFromVector(unusedFeatures);
 }
 
-char SpinPosition::pickRandomVariation(char position)
+bool SpinPosition::pickRandomVariation() const
 {
+    std::vector<char> validVariations;
     //some variations may only be valid for some spins?
     if(position=='c')
     {
-        return easyRandom::pickFromVector(std::vector<char>{'u','f','s'});
+        validVariations = {'u','f','s'};
     }
     else if(position=='s')
     {
-        return easyRandom::pickFromVector(std::vector<char>{'u','f','b','s'});
+        validVariations = {'u','f','b','s'};
     }
     else if(position=='u')
     {
-        return easyRandom::pickFromVector(std::vector<char>{'u','f','b'}); //does a headless spin count as upright up?
+        validVariations = {'u','f','b'}; //does a headless spin count as upright up?
     }
     else if(position=='l')
     {
-        return easyRandom::pickFromVector(std::vector<char>{'s','b'}); //layback up?
+        validVariations = {'s','b'}; //layback up?
     }
-    return -1;
+    std::vector<char> usedVariations = variations;
+    std::vector<char> unusedVariations;
+    std::sort(validVariations.begin(),validVariations.end());
+    std::sort(usedVariations.begin(),usedVariations.end());
+    std::set_difference(validVariations.begin(),validVariations.end(),usedVariations.begin(),usedVariations.end(),std::back_inserter(unusedVariations));
+    if(unusedVariations.empty())
+        return -1;
+    else
+        return easyRandom::pickFromVector(unusedVariations);
 }

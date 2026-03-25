@@ -21,16 +21,17 @@ class SpinSegment
         //segment specific features
         typedef struct {
             bool difficultChangeOfPosition = false; //sit or upright to camel spin
-            bool laybackTransition = false; //core transition backwards->sideways or reverse
             bool biellmannAfterLayback = false;
         } SpinSegmentFeatures;
         SpinSegmentFeatures features;
 
 
-        SpinSegment(char direction);
+        SpinSegment(char footness);
+        SpinSegment(char footness, std::vector<SpinPosition> spinPositions);
 
         void swapDirection();
 
+        std::vector<char> getUsedPositions() const;
         int getBullets() const; //Difficult variations + features + other. Needed because there is a maximum of 2 bullets per foot in change foot spins.
         std::string getDirectionString() const;
         std::string getFootnessString() const;

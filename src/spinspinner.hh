@@ -37,18 +37,18 @@ class SpinSpinner
     public:
         std::vector<Spin> spinHistory;
 
-        std::string spin(); //as in the act of spinning a wheel, not as in a skating spin
+        std::string spin(); //as in the act of spinning a wheel
         std::string spin(int level);
         std::string spin(char spinType, int level);
     private:
             std::string spin_spinInOnePosition(char spinType, int level);
             std::string spin_combo(int level);
-                void spin_combo_addComboPosition(Spin& newSpin, char footness, int startPoint, int level);
-                bool spin_combo_hasAllRequiredPositions(Spin& newSpin);
+                void spin_combo_addComboPosition(Spin& newSpin, int level);
             void spin_decideRandomBaseQualities(Spin& newSpin);
             void spin_addLevelRandomly(Spin& newSpin);
                 int spin_addLevelRandomly_pickRandomAddition(Spin& newSpin);
-                int spin_addLevelRandomly_pickRandomPositionIndex(Spin& newSpin);
+                SpinSegment* spin_addLevelRandomly_pickRandomSegment(Spin& newSpin);
+                SpinPosition* spin_addLevelRandomly_pickRandomPosition(Spin& newSpin);
             bool spin_checkForDifficultChangeOfPosition(Spin& newSpin);
 
     public:

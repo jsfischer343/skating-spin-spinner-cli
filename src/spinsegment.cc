@@ -1,8 +1,13 @@
 #include "spinsegment.hh"
 
-SpinSegment::SpinSegment(char direction)
+SpinSegment::SpinSegment(char footness)
 {
-    this->direction = direction;
+    this->footness = footness;
+}
+SpinSegment::SpinSegment(char footness, std::vector<SpinPosition> spinPositions)
+{
+    this->footness = footness;
+    this->spinPositions = spinPositions;
 }
 void SpinSegment::swapDirection()
 {
@@ -11,7 +16,16 @@ void SpinSegment::swapDirection()
     else if(direction=='l')
         direction='r';
 }
-int SpinSegment::getBullets(int startPos) const
+std::vector<char> SpinSegment::getUsedPositions() const
+{
+    std::vector<char> usedPositions;
+    for(int i=0;i<spinPositions.size();i++)
+    {
+        usedPositions.push_back(spinPositions.at(i).position);
+    }
+    return usedPositions;
+}
+int SpinSegment::getBullets() const
 {
     int sumOfBullets = 0;
 
@@ -24,8 +38,6 @@ int SpinSegment::getBullets(int startPos) const
 
     //count segement specific features
     if(features.difficultChangeOfPosition)
-        sumOfBullets++;
-    if(features.laybackTransition)
         sumOfBullets++;
     if(features.biellmannAfterLayback)
         sumOfBullets++;

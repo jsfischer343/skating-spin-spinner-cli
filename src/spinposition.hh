@@ -2,6 +2,7 @@
 #ifndef SPINPOSITION_HH_
 #define SPINPOSITION_HH_
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include "easyrandom.hh"
@@ -26,9 +27,8 @@ class SpinPosition
         std::string getFeatureString() const;
         bool hasVariation() const;
         bool hasFeature() const;
-
-        static char pickRandomFeature();
-        static char pickRandomVariation(char position);
+        bool pickRandomFeature() const;
+        bool pickRandomVariation() const;
 };
 
 #endif
