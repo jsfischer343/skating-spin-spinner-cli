@@ -14,7 +14,7 @@
 #define COMBO_CHANGEFOOTSPIN_PROB 0.5
 #define COMBO_FLYINGSPIN_PROB 0.5
 
-//Weights for spin order (sorta)
+//Weights for spin order in combo spins (sorta)
 #define COMBO_START_CAMEL_PROB 0.6
 #define COMBO_START_SIT_PROB 0.36
 #define COMBO_START_UPRIGHT_PROB 0.04
@@ -48,10 +48,11 @@ class SpinSpinner
             void spin_decideRandomBaseQualities(Spin& newSpin);
             void spin_addLevelRandomly(Spin& newSpin);
                 int spin_addLevelRandomly_pickRandomAddition(Spin& newSpin);
+                int spin_addLevelRandomly_pickRandomPositionIndex(Spin& newSpin);
             bool spin_checkForDifficultChangeOfPosition(Spin& newSpin);
 
     public:
-        std::string spinHistoryToString();
+        std::string spinHistoryPrettyPrint();
 
 };
 

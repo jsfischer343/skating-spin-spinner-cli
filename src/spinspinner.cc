@@ -96,7 +96,7 @@ std::string SpinSpinner::spin_spinInOnePosition(char type, int level)
     //record spin
     spinHistory.push_back(newSpin);
     //get string representation of spin
-    return newSpin.toString();
+    return newSpin.prettyPrint();
 }
 std::string SpinSpinner::spin_combo(int level)
 {
@@ -196,7 +196,7 @@ std::string SpinSpinner::spin_combo(int level)
     //record spin
     spinHistory.push_back(newSpin);
     //get string representation of spin
-    return newSpin.toString();
+    return newSpin.prettyPrint();
 }
 void SpinSpinner::spin_combo_addComboPosition(Spin& newSpin, char footness, int startPoint, int level)
 {
@@ -327,7 +327,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
         if(tempRandomSelect==0)
         {
             //add variation
-            int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
+            int tempRandomPositionIndex = spin_addLevelRandomly_pickRandomPositionIndex(newSpin);
             char randomVariation = SpinPosition::pickRandomVariation(newSpin.spinPositions.at(tempRandomPositionIndex).position);
             newSpin.spinPositions.at(tempRandomPositionIndex).variation = randomVariation;
             newSpin.level++;
@@ -380,7 +380,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
         else if(tempRandomSelect==2)
         {
             //add position feature
-            int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
+            int tempRandomPositionIndex = spin_addLevelRandomly_pickRandomPositionIndex(newSpin);
             char randomFeature = SpinPosition::pickRandomFeature();
             newSpin.spinPositions.at(tempRandomPositionIndex).features.push_back(randomFeature);
             newSpin.level++;
@@ -389,7 +389,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
         else if(tempRandomSelect==3) //only occurs in combo spins (see pickRandomAddition sub-function for logic)
         {
             //add intermediate position
-            int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
+            int tempRandomPositionIndex = spin_addLevelRandomly_pickRandomPositionIndex(newSpin);
             newSpin.spinPositions.insert(newSpin.spinPositions.begin()+tempRandomPositionIndex+1,SpinPosition('i',newSpin.spinPositions.at(tempRandomPositionIndex).footness));
             newSpin.hasIntermediatePositionFlag = true;
             newSpin.level++;
@@ -419,7 +419,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     continue;
                 else
                 {
-                    int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
+                    int tempRandomPositionIndex = spin_addLevelRandomly_pickRandomPositionIndex(newSpin);
                     char randomVariation = SpinPosition::pickRandomVariation(newSpin.spinPositions.at(tempRandomPositionIndex).position);
                     if(newSpin.positionVariationUsed(newSpin.spinPositions.at(tempRandomPositionIndex).position,randomVariation)) //if it is already used then re-roll selection of type of "spin addition"
                         continue;
@@ -491,7 +491,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     continue;
                 else
                 {
-                    int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
+                    int tempRandomPositionIndex = spin_addLevelRandomly_pickRandomPositionIndex(newSpin);
                     newSpin.spinPositions.at(tempRandomPositionIndex).features.push_back(randomFeature);
                     newSpin.level++;
                     return;
@@ -504,7 +504,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     continue;
                 else
                 {
-                    int tempRandomPositionIndex = easyRandom::range(0,newSpin.spinPositions.size()-1);
+                    int tempRandomPositionIndex = spin_addLevelRandomly_pickRandomPositionIndex(newSpin);
                     newSpin.spinPositions.insert(newSpin.spinPositions.begin()+tempRandomPositionIndex+1,SpinPosition('i',newSpin.spinPositions.at(tempRandomPositionIndex).footness));
                     newSpin.hasIntermediatePositionFlag = true;
                     newSpin.level++;
@@ -552,6 +552,34 @@ int SpinSpinner::spin_addLevelRandomly_pickRandomAddition(Spin& newSpin)
             return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB});
     }
 }
+int SpinSpinner::spin_addLevelRandomly_pickRandomPositionIndex(Spin& newSpin)
+{
+    int endIndex = newSpin.spinPositions.size()-1;
+    if(!newSpin.isChangeFoot) //not change foot spin
+    {
+        return easyRandom::range(0,endIndex);
+    }
+    else //is change foot spin (need to check for only 2 bullets on each foot)
+    {
+        int changeOfFootIndex = newSpin.getChangeOfFootIndex();
+        int bulletsOnFirstFoot = newSpin.getBulletsOnFoot(0);
+        int bulletsOnSecondFoot = newSpin.getBulletsOnFoot(changeOfFootIndex);
+        if(bulletsOnFirstFoot==2 && bulletsOnSecondFoot<2) //1. 2 bullets on first side
+        {
+            return easyRandom::range(changeOfFootIndex,endIndex);
+        }
+        else if(bulletsOnFirstFoot<2 && bulletsOnSecondFoot==2) //2. 2 bullets on second side
+        {
+            return easyRandom::range(0,changeOfFootIndex);
+        }
+        else if(bulletsOnFirstFoot<2 && bulletsOnSecondFoot<2) //3. less than 2 bullets on both sides
+        {
+            return easyRandom::range(0,endIndex);
+        }
+        else
+            throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total
+    }
+}
 bool SpinSpinner::spin_checkForDifficultChangeOfPosition(Spin& newSpin)
 {
     if(newSpin.spinPositions.size()<2)
@@ -573,12 +601,12 @@ bool SpinSpinner::spin_checkForDifficultChangeOfPosition(Spin& newSpin)
     return false;
 }
 
-std::string SpinSpinner::spinHistoryToString()
+std::string SpinSpinner::spinHistoryPrettyPrint()
 {
     std::string historyString = "";
     for(int i=0;i<spinHistory.size();i++)
     {
-        historyString += spinHistory.at(i).toString()+"\n";
+        historyString += spinHistory.at(i).prettyPrint()+"\n";
     }
     return historyString;
 }

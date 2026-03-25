@@ -86,7 +86,6 @@ bool SpinPosition::hasFeature() const
         return false;
     return true;
 }
-
 char SpinPosition::pickRandomFeature()
 {
     std::vector<char> validFeatures = {'b','c','j','8','s'};
@@ -97,7 +96,7 @@ char SpinPosition::pickRandomVariation(char position)
 {
     if(position=='c')
     {
-        return easyRandom::pickFromVector(std::vector<char>{'u','s'});
+        return easyRandom::pickFromVector(std::vector<char>{'u','f','s'});
     }
     else if(position=='s')
     {
@@ -109,7 +108,7 @@ char SpinPosition::pickRandomVariation(char position)
     }
     else if(position=='l')
     {
-        return easyRandom::pickFromVector(std::vector<char>{'u','s','b'}); //layback up? behind, maybe haircutter?
+        return easyRandom::pickFromVector(std::vector<char>{'s','b'}); //layback up? behind, maybe haircutter?
     }
     return -1;
 }

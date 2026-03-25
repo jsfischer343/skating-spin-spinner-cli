@@ -40,6 +40,8 @@ bool Spin::hasTwoVariations() const
 }
 int Spin::getChangeOfFootIndex() const
 {
+    if(!isChangeFoot)
+        throw; //for obvious reasons
     for(int i=1;i<spinPositions.size();i++)
     {
         if(spinPositions.at(i-1).footness!=spinPositions.at(i).footness)
@@ -49,7 +51,32 @@ int Spin::getChangeOfFootIndex() const
     }
     return -1;
 }
-std::string Spin::toString() const
+int Spin::getBulletsOnFoot(int startPos) const
+{
+    int sumOfBullets = 0;
+
+    //count features and variations on spin positions
+    int i=0;
+    while(i<spinPositions.size())
+    {
+        if(i!=0)
+        {
+            if(spinPositions.at(i-1).footness!=spinPositions.at(i).footness)
+                break;
+            if((spinPositions.at(i-1).position=='s'||spinPositions.at(i-1).position=='u') &&
+                spinPositions.at(i).position=='c') //check if difficultChangeOfPosition was used on this foot
+                sumOfBullets++;
+            //TODO: layback transition
+            //TODO: layback biellmann
+        }
+        if(spinPositions.at(i).variation!=-1)
+            sumOfBullets++;
+        sumOfBullets += spinPositions.at(i).features.size();
+        i++;
+    }
+    return sumOfBullets;
+}
+std::string Spin::prettyPrint() const
 {
     std::string spinString = "";
     if(spinPositions.size()==0) //empty return if spin is "blank"
@@ -95,7 +122,7 @@ std::string Spin::toString() const
             else
                 spinString += spinPositions.at(endIndex).getFootnessString()+" ";
         }
-        tempParsingContainer = toString_part(endIndex);
+        tempParsingContainer = prettyPrint_part(endIndex);
         spinString += tempParsingContainer.first;
         previousEndIndex = endIndex;
         endIndex = tempParsingContainer.second;
@@ -108,7 +135,7 @@ std::string Spin::toString() const
     return spinString;
 }
 
-std::pair<std::string,int> Spin::toString_part(int startIndex) const
+std::pair<std::string,int> Spin::prettyPrint_part(int startIndex) const
 {
     int endIndex = startIndex;
     std::string partialSpinString = "";

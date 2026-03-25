@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
             spinSpinnerObj.spin(spinType.c_str()[0], spinLevel);
         }
     }
-    std::cout << spinSpinnerObj.spinHistoryToString() << std::endl;
+    std::cout << spinSpinnerObj.spinHistoryPrettyPrint() << std::endl;
     spinSpinnerObj.spinHistory.clear();
 
     return 0;

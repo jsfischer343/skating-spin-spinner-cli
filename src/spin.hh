@@ -20,10 +20,10 @@ class Spin
         //spin features
         typedef struct {
             bool changeFootByJump = false;
-            bool difficultChangeOfPosition = false;
+            bool difficultChangeOfPosition = false; //sit or upright to camel spin
             bool difficultEntrance = false;
             bool difficultExit = false;
-            bool laybackTransition = false;
+            bool laybackTransition = false; //core transition backwards->sideways or reverse
             bool biellmannAfterLayback = false;
         } SpinFeatures;
         SpinFeatures spinFeatures;
@@ -39,9 +39,10 @@ class Spin
         bool positionFeatureUsed(char featureChar) const;
         bool hasTwoVariations() const;
         int getChangeOfFootIndex() const;
-        std::string toString() const;
+        int getBulletsOnFoot(int startPos) const; //Difficult variations + features + other. Needed because there is a maximum of 2 bullets per foot in change foot spins.
+        std::string prettyPrint() const;
     private:
-            std::pair<std::string,int> toString_part(int startIndex) const;
+            std::pair<std::string,int> prettyPrint_part(int startIndex) const;
 };
 
 #endif
