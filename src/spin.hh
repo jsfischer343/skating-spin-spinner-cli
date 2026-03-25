@@ -5,28 +5,25 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include "spinposition.hh"
+#include "spinsegment.hh"
 
 class Spin
 {
     public:
         //Base spin qualities
-        char baseType = -1; //camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; combo -> 'k'
-        bool isFlying = false;
-        bool isChangeFoot = false;
+        char baseType; //camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; combo -> 'k'
+        bool isFlying;
+        bool isChangeFoot;
         int level = 0;
-        std::vector<SpinPosition> spinPositions;
+        std::vector<SpinSegment> spinSegments; //maximum 2 (for change foot spins)
 
         //spin features
         typedef struct {
             bool changeFootByJump = false;
-            bool difficultChangeOfPosition = false; //sit or upright to camel spin
             bool difficultEntrance = false;
             bool difficultExit = false;
-            bool laybackTransition = false; //core transition backwards->sideways or reverse
-            bool biellmannAfterLayback = false;
         } SpinFeatures;
-        SpinFeatures spinFeatures;
+        SpinFeatures features;
 
         //flags
         bool hasIntermediatePositionFlag = false;
@@ -35,14 +32,10 @@ class Spin
 
         Spin(char baseType);
 
-        bool positionVariationUsed(char positionChar, char variationChar) const; //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
-        bool positionFeatureUsed(char featureChar) const;
+        bool variationUsed(char positionChar, char variationChar) const; //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
+        bool featureUsed(char featureChar) const;
         bool hasTwoVariations() const;
-        int getChangeOfFootIndex() const;
-        int getBulletsOnFoot(int startPos) const; //Difficult variations + features + other. Needed because there is a maximum of 2 bullets per foot in change foot spins.
         std::string prettyPrint() const;
-    private:
-            std::pair<std::string,int> prettyPrint_part(int startIndex) const;
 };
 
 #endif

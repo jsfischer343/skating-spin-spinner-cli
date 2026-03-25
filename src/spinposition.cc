@@ -1,16 +1,8 @@
 #include "spinposition.hh"
 
-SpinPosition::SpinPosition(char position, char footness)
+SpinPosition::SpinPosition(char position)
 {
     this->position = position;
-    this->footness = footness;
-}
-void SpinPosition::swapDirection()
-{
-    if(direction=='r')
-        direction='l';
-    else if(direction=='l')
-        direction='r';
 }
 std::string SpinPosition::getPositionString() const
 {
@@ -26,33 +18,21 @@ std::string SpinPosition::getPositionString() const
         return "intermediate";
     return "";
 }
-std::string SpinPosition::getDirectionString() const
-{
-    if(direction=='r')
-        return "ccw";
-    else if(direction=='l')
-        return "cw";
-    return "";
-}
-std::string SpinPosition::getFootnessString() const
-{
-    if(footness=='b')
-        return "back";
-    else if(footness=='f')
-        return "forward";
-    return "";
-}
 std::string SpinPosition::getVariationString() const
 {
-    if(variation=='u')
-        return "up";
-    else if(variation=='f')
-        return "front";
-    else if(variation=='b')
-        return "behind";
-    else if(variation=='s')
-        return "side";
-    return "";
+    std::string variationString = "";
+    for(int i=0;i<variations.size();i++)
+    {
+        if(variations.at(i)=='u')
+            variationString += "up";
+        else if(variations.at(i)=='s')
+            variationString += "side";
+        else if(variations.at(i)=='f')
+            variationString += "front";
+        else if(variations.at(i)=='b')
+            variationString += "behind";
+    }
+    return variationString;
 }
 std::string SpinPosition::getFeatureString() const
 {
@@ -76,7 +56,7 @@ std::string SpinPosition::getFeatureString() const
 }
 bool SpinPosition::hasVariation() const
 {
-    if(variation==-1)
+    if(variations.size()==0)
         return false;
     return true;
 }
@@ -94,6 +74,7 @@ char SpinPosition::pickRandomFeature()
 
 char SpinPosition::pickRandomVariation(char position)
 {
+    //some variations may only be valid for some spins?
     if(position=='c')
     {
         return easyRandom::pickFromVector(std::vector<char>{'u','f','s'});
@@ -108,7 +89,7 @@ char SpinPosition::pickRandomVariation(char position)
     }
     else if(position=='l')
     {
-        return easyRandom::pickFromVector(std::vector<char>{'s','b'}); //layback up? behind, maybe haircutter?
+        return easyRandom::pickFromVector(std::vector<char>{'s','b'}); //layback up?
     }
     return -1;
 }

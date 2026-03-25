@@ -5,23 +5,32 @@ Spin::Spin(char baseType)
     this->baseType = baseType;
 }
 
-bool Spin::positionVariationUsed(char positionChar, char variationChar) const
+bool Spin::variationUsed(char positionChar, char variationChar) const
 {
-    for(int i=0;i<spinPositions.size();i++)
+    for(int i=0;i<spinSegments.size();i++)
     {
-        if(spinPositions.at(i).position==positionChar && spinPositions.at(i).variation==variationChar)
-            return true;
+        for(int j=0;j<spinSegments.at(i).spinPositions.size();j++)
+        {
+            for(int k=0;k<spinSegments.at(i).spinPositions.at(j).positions.size();k++)
+            {
+                if(spinSegments.at(i).spinPositions.at(j).position==positionChar && spinSegments.at(i).spinPositions.at(j).variations.at(k)==variationChar)
+                    return true;
+            }
+        }
     }
     return false;
 }
-bool Spin::positionFeatureUsed(char featureChar) const
+bool Spin::featureUsed(char featureChar) const
 {
-    for(int i=0;i<spinPositions.size();i++)
+    for(int i=0;i<spinSegments.size();i++)
     {
-        for(int j=0;j<spinPositions.at(i).features.size();j++)
+        for(int j=0;j<spinSegments.at(i).spinPositions.size();j++)
         {
-            if(spinPositions.at(i).features.at(j)==featureChar)
-                return true;
+            for(int k=0;k<spinSegments.at(i).spinPositions.at(j).positions.size();k++)
+            {
+                if(spinSegments.at(i).spinPositions.at(j).features.at(k)==featureChar)
+                    return true;
+            }
         }
     }
     return false;
@@ -29,133 +38,18 @@ bool Spin::positionFeatureUsed(char featureChar) const
 bool Spin::hasTwoVariations() const
 {
     int variationCount = 0;
-    for(int i=0;i<spinPositions.size();i++)
+    for(int i=0;i<spinSegments.size();i++)
     {
-        if(spinPositions.at(i).variation!=-1)
-            variationCount++;
+        for(int j=0;j<spinSegments.at(i).spinPositions.size();j++)
+        {
+            variationCount += spinSegments.at(i).spinPositions.variations.size();
+        }
     }
     if(variationCount>=2)
         return true;
     return false;
 }
-int Spin::getChangeOfFootIndex() const
-{
-    if(!isChangeFoot)
-        throw; //for obvious reasons
-    for(int i=1;i<spinPositions.size();i++)
-    {
-        if(spinPositions.at(i-1).footness!=spinPositions.at(i).footness)
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-int Spin::getBulletsOnFoot(int startPos) const
-{
-    int sumOfBullets = 0;
-
-    //count features and variations on spin positions
-    int i=0;
-    while(i<spinPositions.size())
-    {
-        if(i!=0)
-        {
-            if(spinPositions.at(i-1).footness!=spinPositions.at(i).footness)
-                break;
-            if((spinPositions.at(i-1).position=='s'||spinPositions.at(i-1).position=='u') &&
-                spinPositions.at(i).position=='c') //check if difficultChangeOfPosition was used on this foot
-                sumOfBullets++;
-            //TODO: layback transition
-            //TODO: layback biellmann
-        }
-        if(spinPositions.at(i).variation!=-1)
-            sumOfBullets++;
-        sumOfBullets += spinPositions.at(i).features.size();
-        i++;
-    }
-    return sumOfBullets;
-}
 std::string Spin::prettyPrint() const
 {
-    std::string spinString = "";
-    if(spinPositions.size()==0) //empty return if spin is "blank"
-        return spinString;
-
-    //declare this spin's level
-    if(level==0)
-        spinString += "Base: ";
-    else if(level==1)
-        spinString += "Level 1: ";
-    else if(level==2)
-        spinString += "Level 2: ";
-    else if(level==3)
-        spinString += "Level 3: ";
-    else if(level==4)
-        spinString += "Level 4: ";
-
-    //starting direction of spin
-    spinString += "("+spinPositions.at(0).getDirectionString()+")[\t";
-
-    //is flying spin?
-    if(isFlying)
-        spinString += "flying ";
-
-    spinString += spinPositions.at(0).getFootnessString()+" ";
-
-    int endIndex = 0;
-    int previousEndIndex = 0;
-    std::pair<std::string,int> tempParsingContainer;
-    while(endIndex!=spinPositions.size())
-    {
-        if(spinPositions.at(endIndex).direction!=spinPositions.at(previousEndIndex).direction)
-        {
-            spinString += "\t] -> ("+spinPositions.at(endIndex).getDirectionString()+")[\t";
-        }
-        if(spinPositions.at(endIndex).footness!=spinPositions.at(previousEndIndex).footness)
-        {
-            if(spinFeatures.changeFootByJump)
-            {
-                spinString.erase(spinString.size()-2);
-                spinString += "--jump-- "+spinPositions.at(endIndex).getFootnessString()+" ";
-            }
-            else
-                spinString += spinPositions.at(endIndex).getFootnessString()+" ";
-        }
-        tempParsingContainer = prettyPrint_part(endIndex);
-        spinString += tempParsingContainer.first;
-        previousEndIndex = endIndex;
-        endIndex = tempParsingContainer.second;
-    }
-    spinString += "\t] ";
-    if(spinFeatures.difficultEntrance)
-        spinString += "with difficult entrance";
-    if(spinFeatures.difficultExit)
-        spinString += "with difficult exit";
-    return spinString;
-}
-
-std::pair<std::string,int> Spin::prettyPrint_part(int startIndex) const
-{
-    int endIndex = startIndex;
-    std::string partialSpinString = "";
-    for(int i=startIndex;i<spinPositions.size();i++)
-    {
-        if(spinPositions.at(startIndex).direction!=spinPositions.at(i).direction ||
-            spinPositions.at(startIndex).footness!=spinPositions.at(i).footness)
-        {
-            break;
-        }
-        partialSpinString += spinPositions.at(i).getPositionString();
-        std::string positionVariationString = spinPositions.at(i).getVariationString();
-        if(positionVariationString!="")
-            partialSpinString += " "+positionVariationString;
-        std::string positionFeatureString = spinPositions.at(i).getFeatureString();
-        if(positionFeatureString!="")
-            partialSpinString += "("+positionFeatureString+")";
-        if(i!=spinPositions.size()-1)
-            partialSpinString += " + ";
-        endIndex = i+1;
-    }
-    return std::pair<std::string,int>{partialSpinString,endIndex};
+    return "WIP";
 }
