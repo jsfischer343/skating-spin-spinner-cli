@@ -16,6 +16,13 @@ void SpinSegment::swapDirection()
     else if(direction=='l')
         direction='r';
 }
+void SpinSegment::swapFootness()
+{
+    if(footness=='b')
+        footness='f';
+    else if(footness=='f')
+        footness='b';
+}
 std::vector<char> SpinSegment::getUsedPositions() const
 {
     std::vector<char> usedPositions;
@@ -82,6 +89,8 @@ std::string SpinSegment::prettyPrint() const
         if(i!=spinPositions.size()-1)
             resultString += " + ";
     }
+    if(this->features.biellmannAfterLayback)
+        resultString += " -> biellmann";
     resultString += " ]";
 
     return resultString;

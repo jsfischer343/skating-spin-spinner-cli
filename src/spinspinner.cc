@@ -461,6 +461,8 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                         newSpin.spinSegments.at(0).swapDirection();
                     else
                         newSpin.spinSegments.at(1).swapDirection();
+                    if(easyRandom::range(0,1))
+                        newSpin.spinSegments.at(1).swapFootness();
                     newSpin.changeDirectionFlag = true;
                     break;
                 }
