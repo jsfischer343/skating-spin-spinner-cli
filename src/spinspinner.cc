@@ -195,9 +195,9 @@ std::string SpinSpinner::spin_combo(int level)
 }
 void SpinSpinner::spin_combo_addComboPosition(Spin& newSpin, int level)
 {
-    SpinSegment currentSegment = newSpin.spinSegments.at(newSpin.spinSegments.size()-1);
+    SpinSegment* currentSegment = &newSpin.spinSegments.at(newSpin.spinSegments.size()-1);
 
-    if(currentSegment.spinPositions.size()==3 || newSpin.spinSegments.size()>=2) //If this is true then it would imply that we are trying to add a 4th basic position to the same foot OR add a third segment, which wouldn't make sense
+    if(currentSegment->spinPositions.size()==3 || newSpin.spinSegments.size()>2) //If this is true then it would imply that we are trying to add a 4th basic position to the same foot OR add a third segment, which wouldn't make sense
     {
         throw;
     }
@@ -205,41 +205,47 @@ void SpinSpinner::spin_combo_addComboPosition(Spin& newSpin, int level)
     if(level>=1) //combo spins level 1 or higher can have a difficult change of position so the logic is more lax (i.e. there is more rolling of random numbers)
     {
         std::vector<char> validPositions = {'c','s','u'};
-        std::vector<char> usedPositions = currentSegment.getUsedPositions();
+        std::vector<char> usedPositions = currentSegment->getUsedPositions();
         std::vector<char> unusedPositions;
 
         std::sort(usedPositions.begin(),usedPositions.end());
         std::set_difference(validPositions.begin(),validPositions.end(),usedPositions.begin(),usedPositions.end(),std::back_inserter(unusedPositions));
 
         std::vector<double> positionWeightsForUnusedPositions;
-        positionWeightsForUnusedPositions.push_back(COMBO_START_CAMEL_PROB);
-        positionWeightsForUnusedPositions.push_back(COMBO_START_SIT_PROB);
-        positionWeightsForUnusedPositions.push_back(COMBO_START_UPRIGHT_PROB);
+        for(int i=0;i<unusedPositions.size();i++)
+        {
+            if(unusedPositions.at(i)=='c')
+                positionWeightsForUnusedPositions.push_back(COMBO_START_CAMEL_PROB);
+            else if(unusedPositions.at(i)=='s')
+                positionWeightsForUnusedPositions.push_back(COMBO_START_SIT_PROB);
+            else if(unusedPositions.at(i)=='u')
+                positionWeightsForUnusedPositions.push_back(COMBO_START_UPRIGHT_PROB);
+        }
 
         char nextPosition = easyRandom::pickFromVectorWeighted(unusedPositions,positionWeightsForUnusedPositions);
-        currentSegment.spinPositions.push_back(SpinPosition(nextPosition));
+        currentSegment->spinPositions.push_back(SpinPosition(nextPosition));
     }
     else //there is a small amount of base combos that can be rolled so the logic is a bit simpler. Note: intermediate positions aren't valid for a base spin
     {
         char nextPosition;
-        int previousIndex = currentSegment.spinPositions.size()-1;
-        if(currentSegment.spinPositions.size()==0 && easyRandom::range(0,1)) //1. Is change of foot spin and this is the first position 2. it is randomly decided to repeat the position from the previous foot (i.e. forward camel -> back camel)
+        int previousIndex = currentSegment->spinPositions.size()-1;
+        if(currentSegment->spinPositions.size()==0 && easyRandom::range(0,1)) //1. Is change of foot spin and this is the first position 2. it is randomly decided to repeat the position from the previous foot (i.e. forward camel -> back camel)
         {
-            if(currentSegment.spinPositions.at(previousIndex).position=='c')
+            if(currentSegment->spinPositions.at(previousIndex).position=='c')
                 nextPosition = 'c';
-            else if(currentSegment.spinPositions.at(previousIndex).position=='s')
+            else if(currentSegment->spinPositions.at(previousIndex).position=='s')
                 nextPosition = 's';
-            else if(currentSegment.spinPositions.at(previousIndex).position=='u')
+            else if(currentSegment->spinPositions.at(previousIndex).position=='u')
                 nextPosition = 'u';
         }
         else //implies that this position is on the same foot as the previous position
         {
-            if(currentSegment.spinPositions.at(previousIndex).position=='c')
+            if(currentSegment->spinPositions.at(previousIndex).position=='c')
                 nextPosition = 's';
-            else if(currentSegment.spinPositions.at(previousIndex).position=='s')
+            else if(currentSegment->spinPositions.at(previousIndex).position=='s')
                 nextPosition = 'u';
         }
-        currentSegment.spinPositions.push_back(SpinPosition(nextPosition));
+        currentSegment->spinPositions.push_back(SpinPosition(nextPosition));
     }
 }
 void SpinSpinner::spin_decideRandomBaseQualities(Spin& newSpin)
@@ -347,6 +353,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
         else
             throw; //implies that randomSelect is outside of possible spin additions (this would be a bug)
         newSpin.level++;
+        return;
     }
     else if(newSpin.level==1 || newSpin.level==2) //increasing to level 2 and 3 is relatively similar but requires checks for conflicts (current implementation of "checks" just means re-roll until it doesn't conflict)
     {
@@ -368,11 +375,12 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     {
                         randomPosition->variations.push_back(randomVariation);
                         if(newSpin.hasTwoVariations())
+                        {
                             newSpin.twoVariationsFlag = true;
-                        return;
+                            break;
+                        }
                     }
                 }
-
             }
             else if(randomSelect==1)
             {
@@ -389,18 +397,21 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                 if(randomSelect2==0 && !newSpin.features.changeFootByJump) //changeFootByJump
                 {
                     newSpin.features.changeFootByJump = true;
+                    break;
                 }
                 else if(randomSelect2==1 &&
                 !newSpin.features.difficultExit &&
                 !newSpin.features.difficultEntrance) //difficultEntrance
                 {
                     newSpin.features.difficultEntrance = true;
+                    break;
                 }
                 else if(randomSelect2==2 &&
                 !newSpin.features.difficultExit &&
                 !newSpin.features.difficultEntrance) //difficultExit
                 {
                     newSpin.features.difficultExit = true;
+                    break;
                 }
                 else if(randomSelect2==3) //biellmann after layback
                 {
@@ -408,6 +419,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     if(randomSegment->features.biellmannAfterLayback)
                         continue;
                     randomSegment->features.biellmannAfterLayback = true;
+                    break;
                 }
                 else
                     continue;
@@ -422,6 +434,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                 else
                 {
                     randomPosition->features.push_back(randomFeature);
+                    break;
                 }
             }
             else if(randomSelect==3) //only occurs in combo spins (see pickRandomAddition sub-function for logic)
@@ -435,6 +448,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     int randomSpinPositionIndex = easyRandom::range(0,randomSegment->spinPositions.size()-1);
                     randomSegment->spinPositions.insert(randomSegment->spinPositions.begin()+randomSpinPositionIndex+1,SpinPosition('i'));
                     newSpin.intermediatePositionFlag = true;
+                    break;
                 }
             }
             else if(randomSelect==4) //change of direction (only for change foot spins)
@@ -448,6 +462,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
                     else
                         newSpin.spinSegments.at(1).swapDirection();
                     newSpin.changeDirectionFlag = true;
+                    break;
                 }
             }
             else
@@ -518,16 +533,16 @@ bool SpinSpinner::spin_checkForDifficultChangeOfPosition(Spin& newSpin)
 {
     for(int i=0;i<newSpin.spinSegments.size();i++)
     {
-        SpinSegment currentSegment = newSpin.spinSegments.at(i);
-        for(int j=1;j<currentSegment.spinPositions.size();j++)
+        SpinSegment* currentSegment = &newSpin.spinSegments.at(i);
+        for(int j=1;j<currentSegment->spinPositions.size();j++)
         {
-            char previousPosition = currentSegment.spinPositions.at(j-1).position;
-            char currentPosition = currentSegment.spinPositions.at(j).position;
+            char previousPosition = currentSegment->spinPositions.at(j-1).position;
+            char currentPosition = currentSegment->spinPositions.at(j).position;
             if(previousPosition=='s'||previousPosition=='u')
             {
                 if(currentPosition=='c')
                 {
-                    currentSegment.features.difficultChangeOfPosition = true;
+                    currentSegment->features.difficultChangeOfPosition = true;
                     return true;
                 }
             }

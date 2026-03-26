@@ -35,5 +35,6 @@ class SpinSegment
         int getBullets() const; //Difficult variations + features + other. Needed because there is a maximum of 2 bullets per foot in change foot spins.
         std::string getDirectionString() const;
         std::string getFootnessString() const;
+        std::string prettyPrint() const;
 };
 #endif

@@ -4,56 +4,6 @@ SpinPosition::SpinPosition(char position)
 {
     this->position = position;
 }
-std::string SpinPosition::getPositionString() const
-{
-    if(position=='c')
-        return "camel";
-    else if(position=='s')
-        return "sit";
-    else if(position=='u')
-        return "upright";
-    else if(position=='l')
-        return "layback";
-    else if(position=='i')
-        return "intermediate";
-    return "";
-}
-std::string SpinPosition::getVariationString() const
-{
-    std::string variationString = "";
-    for(int i=0;i<variations.size();i++)
-    {
-        if(variations.at(i)=='u')
-            variationString += "up";
-        else if(variations.at(i)=='s')
-            variationString += "side";
-        else if(variations.at(i)=='f')
-            variationString += "front";
-        else if(variations.at(i)=='b')
-            variationString += "behind";
-    }
-    return variationString;
-}
-std::string SpinPosition::getFeatureString() const
-{
-    std::string featureString = "";
-    for(int i=0;i<features.size();i++)
-    {
-        if(features.at(i)=='b')
-            featureString += "blade";
-        else if(features.at(i)=='c')
-            featureString += "coe";
-        else if(features.at(i)=='j')
-            featureString += "jump";
-        else if(features.at(i)=='8')
-            featureString += "8revs";
-        else if(features.at(i)=='s')
-            featureString += "speed";
-        if(i!=features.size()-1)
-            featureString += ", ";
-    }
-    return featureString;
-}
 bool SpinPosition::hasVariation() const
 {
     if(variations.size()==0)
@@ -66,7 +16,7 @@ bool SpinPosition::hasFeature() const
         return false;
     return true;
 }
-bool SpinPosition::pickRandomFeature() const
+char SpinPosition::pickRandomFeature() const
 {
     std::vector<char> validFeatures = {'b','c','j','8','s'};
     std::vector<char> usedFeatures = features;
@@ -79,8 +29,7 @@ bool SpinPosition::pickRandomFeature() const
     else
         return easyRandom::pickFromVector(unusedFeatures);
 }
-
-bool SpinPosition::pickRandomVariation() const
+char SpinPosition::pickRandomVariation() const
 {
     std::vector<char> validVariations;
     //some variations may only be valid for some spins?
@@ -109,4 +58,65 @@ bool SpinPosition::pickRandomVariation() const
         return -1;
     else
         return easyRandom::pickFromVector(unusedVariations);
+}
+std::string SpinPosition::prettyPrint() const
+{
+    std::string resultString = "";
+    resultString += getPositionString()+" ";
+    resultString += getVariationString();
+    if(!this->features.empty())
+        resultString += "("+getFeatureString()+")";
+    return resultString;
+}
+std::string SpinPosition::getPositionString() const
+{
+    if(position=='c')
+        return "camel";
+    else if(position=='s')
+        return "sit";
+    else if(position=='u')
+        return "upright";
+    else if(position=='l')
+        return "layback";
+    else if(position=='i')
+        return "intermediate";
+    return "";
+}
+std::string SpinPosition::getVariationString() const
+{
+    std::string variationString = "";
+    for(int i=0;i<variations.size();i++)
+    {
+        if(variations.at(i)=='u')
+            variationString += "up";
+        else if(variations.at(i)=='s')
+            variationString += "side";
+        else if(variations.at(i)=='f')
+            variationString += "front";
+        else if(variations.at(i)=='b')
+            variationString += "behind";
+        if(i!=variations.size()-1)
+            variationString += " & ";
+    }
+    return variationString;
+}
+std::string SpinPosition::getFeatureString() const
+{
+    std::string featureString = "";
+    for(int i=0;i<features.size();i++)
+    {
+        if(features.at(i)=='b')
+            featureString += "blade";
+        else if(features.at(i)=='c')
+            featureString += "coe";
+        else if(features.at(i)=='j')
+            featureString += "jump";
+        else if(features.at(i)=='8')
+            featureString += "8revs";
+        else if(features.at(i)=='s')
+            featureString += "speed";
+        if(i!=features.size()-1)
+            featureString += ", ";
+    }
+    return featureString;
 }

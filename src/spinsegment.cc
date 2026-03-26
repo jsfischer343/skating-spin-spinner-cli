@@ -60,3 +60,29 @@ std::string SpinSegment::getFootnessString() const
         return "forward";
     return "";
 }
+std::string SpinSegment::prettyPrint() const
+{
+    std::string resultString = "";
+
+    //direction
+    if(this->direction=='r')
+        resultString += "(ccw)[ ";
+    else if(this->direction=='l')
+        resultString += "(cw)[ ";
+
+    //footness
+    if(this->footness=='b')
+        resultString += "back ";
+    else if(this->footness=='f')
+        resultString += "forward ";
+
+    for(int i=0;i<spinPositions.size();i++)
+    {
+        resultString += spinPositions.at(i).prettyPrint();
+        if(i!=spinPositions.size()-1)
+            resultString += " + ";
+    }
+    resultString += " ]";
+
+    return resultString;
+}

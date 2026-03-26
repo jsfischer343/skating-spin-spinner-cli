@@ -80,5 +80,40 @@ bool Spin::hasTwoVariations() const
 }
 std::string Spin::prettyPrint() const
 {
-    return "WIP";
+    std::string resultString = "";
+    //level
+    resultString += "Level "+std::to_string(this->level)+": ";
+
+    //flying modifier
+    if(this->isFlying)
+        resultString += "flying ";
+
+    //first segment
+    resultString += this->spinSegments.at(0).prettyPrint();
+
+    if(this->spinSegments.size()>1)
+    {
+        //transition
+        if(this->features.changeFootByJump)
+            resultString += " --jump-- ";
+        else
+            resultString += " + ";
+
+        //second segment
+        resultString += this->spinSegments.at(1).prettyPrint();
+
+        //any remaining segments?
+        for(int i=2;i<spinSegments.size();i++)
+        {
+            resultString += this->spinSegments.at(i).prettyPrint();
+        }
+    }
+
+    //final modifiers
+    if(this->features.difficultEntrance)
+        resultString += " with difficult entrance";
+    if(this->features.difficultExit)
+        resultString += " with difficult exit";
+
+    return resultString;
 }

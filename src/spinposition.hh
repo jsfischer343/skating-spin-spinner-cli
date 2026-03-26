@@ -22,13 +22,14 @@ class SpinPosition
 
         SpinPosition(char position);
 
+        bool hasVariation() const;
+        bool hasFeature() const;
+        char pickRandomFeature() const;
+        char pickRandomVariation() const;
+        std::string prettyPrint() const;
         std::string getPositionString() const;
         std::string getVariationString() const;
         std::string getFeatureString() const;
-        bool hasVariation() const;
-        bool hasFeature() const;
-        bool pickRandomFeature() const;
-        bool pickRandomVariation() const;
 };
 
 #endif
