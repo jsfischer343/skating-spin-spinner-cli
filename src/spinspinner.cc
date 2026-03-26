@@ -228,23 +228,36 @@ void SpinSpinner::spin_combo_addComboPosition(Spin& newSpin, int level)
     else //there is a small amount of base combos that can be rolled so the logic is a bit simpler. Note: intermediate positions aren't valid for a base spin
     {
         char nextPosition;
-        int previousIndex = currentSegment->spinPositions.size()-1;
-        if(currentSegment->spinPositions.size()==0 && easyRandom::range(0,1)) //1. Is change of foot spin and this is the first position 2. it is randomly decided to repeat the position from the previous foot (i.e. forward camel -> back camel)
+        if(currentSegment->spinPositions.size()==0) //Is change of foot spin and this is the first position
         {
-            if(currentSegment->spinPositions.at(previousIndex).position=='c')
-                nextPosition = 'c';
-            else if(currentSegment->spinPositions.at(previousIndex).position=='s')
-                nextPosition = 's';
-            else if(currentSegment->spinPositions.at(previousIndex).position=='u')
-                nextPosition = 'u';
+            SpinSegment* previousSegment = &newSpin.spinSegments.at(newSpin.spinSegments.size()-2);
+            int lastIndex = previousSegment->spinPositions.size()-1;
+            if(easyRandom::range(0,1)) //50/50 to repeat position on previous foot or change
+            {
+                if(previousSegment->spinPositions.at(lastIndex).position=='c')
+                    nextPosition = 'c';
+                else if(previousSegment->spinPositions.at(lastIndex).position=='s')
+                    nextPosition = 's';
+                else if(previousSegment->spinPositions.at(lastIndex).position=='u')
+                    nextPosition = 'u';
+            }
+            else //
+            {
+                if(previousSegment->spinPositions.at(lastIndex).position=='c')
+                    nextPosition = 's';
+                else if(previousSegment->spinPositions.at(lastIndex).position=='s')
+                    nextPosition = 'u';
+            }
         }
         else //implies that this position is on the same foot as the previous position
         {
+            int previousIndex = currentSegment->spinPositions.size()-1;
             if(currentSegment->spinPositions.at(previousIndex).position=='c')
                 nextPosition = 's';
             else if(currentSegment->spinPositions.at(previousIndex).position=='s')
                 nextPosition = 'u';
         }
+
         currentSegment->spinPositions.push_back(SpinPosition(nextPosition));
     }
 }

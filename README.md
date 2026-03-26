@@ -1,6 +1,6 @@
 ## About
 
-Skating spin spinner is a simple project that attempts to spin random figure skating spins that will follow ISU (international skating union) rules. It is intended to layout the required logic that then can be used in graphical projects. See [2025-26 Levels of Difficulty Singles.pdf](2025-26 Levels of Difficulty Singles.pdf) for rule details.
+Skating spin spinner is a simple project that "spins" random figure skating spins that follow ISU (international skating union) rules. It is intended to layout the required logic that then can be used to make a graphical application. See [2025-26 Levels of Difficulty Singles.pdf]("2025-26 Levels of Difficulty Singles.pdf") for rule details.
 
 ## Setup
 
@@ -8,26 +8,28 @@ To use the spin spinner cli, download from [releases](https://github.com/jsfisch
 
 ## Terms
 
-Direction: Refers to the rotational direction of the spin, either clockwise or counterclockwise.
-Footness: Refers to foot that is spun on, either dominant (counterclockwise on right foot, clockwise on left foot) or non-dominant (clockwise on right foot, counterclockwise on left foot).
-Position: Camel, sit, upright, or layback that act as a base components of spins. There is also a "non-basic" or intermediate position that can appear in combo spins.
-Segment: A series of positions all on the same foot. Change foot spins will have two segments, all other spins will only have one.
-(Difficult) Variation: A change of core or body position inside of a spin position that changes the quality of the spin in a significant way.
-Feature: A special modification to the nature of a spin that makes it more difficult. In some contexts a difficult variation is also considered a feature.
+* Direction: Refers to the rotational direction of the spin, either clockwise or counterclockwise.
+* Footness: Refers to foot that is spun on, either dominant (counterclockwise on right foot, clockwise on left foot) or non-dominant (clockwise on right foot, counterclockwise on left foot).
+* Position: Camel, sit, upright, or layback that act as a base components of spins. There is also a "non-basic" or intermediate position that can appear in combo spins.
+* Segment: A series of positions all on the same foot. Change foot spins will have two segments, all other spins will only have one.
+* (Difficult) Variation: A change of core or body position inside of a spin position that changes the quality of the spin in a significant way.
+* Feature: A special modification to the nature of a spin that makes it more difficult. In some contexts a difficult variation is also considered a feature.
 
 ## Format
 
 Level x: (direction)\[ footness position variation & variation (features) + ...\] + (direction)\[ footness position variation & variation (features) + ...\] with difficult entry/exit
 
----
-
 Examples:
-`
+```
 Level 3: (ccw)[ back layback side(8revs) ] with difficult exit
 Level 3: (ccw)[ back camel (8revs, coe) ] + (ccw)[ forward camel front & side ]
 Level 2: flying (ccw)[ forward camel  + sit  + upright  ] --jump-- (ccw)[ back sit  + camel  + upright  ]
 Level 1: (ccw)[ forward sit  ] + (ccw)[ back sit front ]
-`
+```
+
+## Disclaimer
+
+Although a good effort is made to ensure that spins spun using this program will follow guidelines there is no guarantee. Make sure to check each spin against the most up to date rules provided by ISU.
 
 ## Credits
 
