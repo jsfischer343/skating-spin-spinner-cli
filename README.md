@@ -1,6 +1,6 @@
 ## About
 
-Skating spin spinner is a simple project that "spins" random figure skating spins that follow ISU (international skating union) rules. It is intended to layout the required logic that then can be used to make a graphical application. See [2025-26 Levels of Difficulty Singles.pdf]("2025-26 Levels of Difficulty Singles.pdf") for rule details.
+Skating spin spinner is a simple project that "spins" random figure skating spins that follow ISU (international skating union) rules. It is intended to layout the required logic that then can be used to make a graphical application. See 2025-26 Levels of Difficulty Singles.pdf for rule details.
 
 ## Setup
 
