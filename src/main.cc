@@ -72,9 +72,10 @@ void validateInput(ap::argmap& args)
 int main(int argc, char* argv[]) {
 
     ap::parser p(argc, argv);
-    p.add("-l", "--level",  "Spin level (numeric 0-4)",     ap::mode::OPTIONAL);
-    p.add("-t", "--type",   "Type of spin (any, camel, sit, upright, layback, combo)",      ap::mode::OPTIONAL);
-    p.add("-n", "--number",    "Number spins spun (between 1-100)", ap::mode::OPTIONAL);
+    p.add("-l", "--level",  "Spin level (numeric 0-4)");
+    p.add("-t", "--type",   "Type of spin (any, camel, sit, upright, layback, combo)");
+    p.add("-n", "--number", "Number spins spun (between 1-100)");
+    p.add("-c", "--code",   "Prints spin as code rather than human readable", ap::mode::BOOLEAN);
 
     ap::argmap args = p.parse();
 
@@ -104,7 +105,14 @@ int main(int argc, char* argv[]) {
             spinSpinnerObj.spin(spinType.c_str()[0], spinLevel);
         }
     }
-    std::cout << spinSpinnerObj.spinHistoryPrettyPrint() << std::endl;
+    if(std::stoi(args["--code"]))
+    {
+        std::cout << spinSpinnerObj.spinHistoryToCode() << std::endl;
+    }
+    else
+    {
+        std::cout << spinSpinnerObj.spinHistoryPrettyPrint() << std::endl;
+    }
     spinSpinnerObj.spinHistory.clear();
 
     return 0;

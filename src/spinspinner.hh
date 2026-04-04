@@ -52,6 +52,7 @@ class SpinSpinner
             bool spin_checkForDifficultChangeOfPosition(Spin& newSpin);
 
     public:
+        std::string spinHistoryToCode();
         std::string spinHistoryPrettyPrint();
 
 };

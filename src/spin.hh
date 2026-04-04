@@ -37,6 +37,8 @@ class Spin
         bool variationUsed(char positionChar, char variationChar) const; //the same variation can't be used on the same position type (i.e. camel side twice, sit front twice, ...)
         bool featureUsed(char featureChar) const;
         bool hasTwoVariations() const;
+
+        std::string toCode() const;
         std::string prettyPrint() const;
 };
 

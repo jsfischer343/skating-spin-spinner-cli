@@ -78,6 +78,45 @@ bool Spin::hasTwoVariations() const
         return true;
     return false;
 }
+std::string Spin::toCode() const
+{
+    std::string resultString = "";
+    //level
+    resultString += "L"+std::to_string(this->level)+":";
+
+    //flying modifier
+    if(this->isFlying)
+        resultString += "F";
+
+    //first segment
+    resultString += this->spinSegments.at(0).toCode();
+
+    if(this->spinSegments.size()>1)
+    {
+        //transition
+        if(this->features.changeFootByJump)
+            resultString += "-j-";
+        else
+            resultString += "+";
+
+        //second segment
+        resultString += this->spinSegments.at(1).toCode();
+
+        //any remaining segments?
+        for(int i=2;i<spinSegments.size();i++)
+        {
+            resultString += this->spinSegments.at(i).toCode();
+        }
+    }
+
+    //final modifiers
+    if(this->features.difficultEntrance)
+        resultString += "DE";
+    if(this->features.difficultExit)
+        resultString += "DX";
+
+    return resultString;
+}
 std::string Spin::prettyPrint() const
 {
     std::string resultString = "";

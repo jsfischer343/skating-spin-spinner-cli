@@ -26,10 +26,12 @@ class SpinPosition
         bool hasFeature() const;
         char pickRandomFeature() const;
         char pickRandomVariation() const;
+
+        std::string toCode() const;
         std::string prettyPrint() const;
-        std::string getPositionString() const;
-        std::string getVariationString() const;
-        std::string getFeatureString() const;
+        std::string getPositionString(bool codeFormat) const;
+        std::string getVariationString(bool codeFormat) const;
+        std::string getFeatureString(bool codeFormat) const;
 };
 
 #endif

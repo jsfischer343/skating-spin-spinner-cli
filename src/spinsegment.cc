@@ -67,6 +67,34 @@ std::string SpinSegment::getFootnessString() const
         return "forward";
     return "";
 }
+std::string SpinSegment::toCode() const
+{
+    std::string resultString = "";
+
+    //direction
+    if(this->direction=='r')
+        resultString += "cc[";
+    else if(this->direction=='l')
+        resultString += "c[";
+
+    //footness
+    if(this->footness=='b')
+        resultString += "Bw";
+    else if(this->footness=='f')
+        resultString += "Fw";
+
+    for(int i=0;i<spinPositions.size();i++)
+    {
+        resultString += spinPositions.at(i).toCode();
+        if(i!=spinPositions.size()-1)
+            resultString += "+";
+    }
+    if(this->features.biellmannAfterLayback)
+        resultString += "Bi";
+    resultString += "]";
+
+    return resultString;
+}
 std::string SpinSegment::prettyPrint() const
 {
     std::string resultString = "";

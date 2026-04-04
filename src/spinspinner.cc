@@ -565,7 +565,15 @@ bool SpinSpinner::spin_checkForDifficultChangeOfPosition(Spin& newSpin)
     }
     return false;
 }
-
+std::string SpinSpinner::spinHistoryToCode()
+{
+    std::string historyString = "";
+    for(int i=0;i<spinHistory.size();i++)
+    {
+        historyString += spinHistory.at(i).toCode()+"\n";
+    }
+    return historyString;
+}
 std::string SpinSpinner::spinHistoryPrettyPrint()
 {
     std::string historyString = "";
