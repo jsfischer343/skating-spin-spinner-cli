@@ -308,7 +308,7 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
         int randomSelect = spin_addLevelRandomly_pickRandomAddition(newSpin);
         if(randomSelect==0) //add variation
         {
-            SpinPosition* randomPosition = spin_addLevelRandomly_pickRandomPosition(newSpin);
+            SpinPosition* randomPosition = spin_addLevelRandomly_pickExistingPosition(newSpin);
             char randomVariation = randomPosition->pickRandomVariation();
             randomPosition->variations.push_back(randomVariation);
         }
@@ -338,19 +338,19 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
             }
             else if(randomSelect2==3) //biellmann after layback
             {
-                SpinSegment* randomSegment = spin_addLevelRandomly_pickRandomSegment(newSpin);
+                SpinSegment* randomSegment = spin_addLevelRandomly_pickExistingSegment(newSpin);
                 randomSegment->features.biellmannAfterLayback = true;
             }
         }
         else if(randomSelect==2) //add position feature
         {
-            SpinPosition* randomPosition = spin_addLevelRandomly_pickRandomPosition(newSpin);
+            SpinPosition* randomPosition = spin_addLevelRandomly_pickExistingPosition(newSpin);
             char randomFeature = randomPosition->pickRandomFeature();
             randomPosition->features.push_back(randomFeature);
         }
         else if(randomSelect==3) //add intermediate position (only for combos)
         {
-            SpinSegment* randomSegment = spin_addLevelRandomly_pickRandomSegment(newSpin);
+            SpinSegment* randomSegment = spin_addLevelRandomly_pickExistingSegment(newSpin);
             int randomSpinPositionIndex = easyRandom::range(0,randomSegment->spinPositions.size()-1);
             randomSegment->spinPositions.insert(randomSegment->spinPositions.begin()+randomSpinPositionIndex+1,SpinPosition('i'));
             newSpin.intermediatePositionFlag = true;
@@ -368,126 +368,126 @@ void SpinSpinner::spin_addLevelRandomly(Spin& newSpin)
         newSpin.level++;
         return;
     }
-    else if(newSpin.level==1 || newSpin.level==2) //increasing to level 2 and 3 is relatively similar but requires checks for conflicts (current implementation of "checks" just means re-roll until it doesn't conflict)
+    else //need to check for conflicts with features already in the spin
     {
-        while(true) //keep looping until the rolled "spin addition" (variation/features) doesn't conflict with any other additions (lazy implementation)
+        if(newSpin.level==3 && spin_addLevelRandomly_missingBulletForLevel4(newSpin)) //if missing the required bullets for level 4 and the next level is level 4 then add from the required bullets
         {
-            int randomSelect = spin_addLevelRandomly_pickRandomAddition(newSpin);
-            if(randomSelect==0)
+            spin_addLevelRandomly_addARequiredBulletForLevel4(newSpin);
+        }
+        else
+        {
+            while(true) //keep looping until the rolled "spin addition" (variation/features) doesn't conflict with any other additions (lazy implementation)
             {
-                //add variation
-                if(newSpin.twoVariationsFlag)
-                    continue;
-                else
+                int randomSelect = spin_addLevelRandomly_pickRandomAddition(newSpin); //of the categories spin feature, position feature, intermediate position, change of direction
+                if(randomSelect==0)
                 {
-                    SpinPosition* randomPosition = spin_addLevelRandomly_pickRandomPosition(newSpin);
-                    char randomVariation = randomPosition->pickRandomVariation();
-                    if(newSpin.variationUsed(randomPosition->position,randomVariation)) //if it is already used then re-roll selection of type of "spin addition"
+                    //add variation
+                    if(newSpin.twoVariationsFlag)
                         continue;
                     else
                     {
-                        randomPosition->variations.push_back(randomVariation);
-                        if(newSpin.hasTwoVariations())
+                        SpinPosition* randomPosition = spin_addLevelRandomly_pickExistingPosition(newSpin);
+                        char randomVariation = randomPosition->pickRandomVariation();
+                        if(newSpin.variationUsed(randomPosition->position,randomVariation)) //if it is already used then re-roll selection of type of "spin addition"
+                            continue;
+                        else
                         {
-                            newSpin.twoVariationsFlag = true;
-                            break;
+                            randomPosition->variations.push_back(randomVariation);
+                            if(newSpin.hasTwoVariations())
+                            {
+                                newSpin.twoVariationsFlag = true;
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            else if(randomSelect==1)
-            {
-                //add spin feature
-                int randomSelect2;
-                int tempLowerRandomRange = 1;
-                int tempUpperRandomRange = 2;
-                if(newSpin.isChangeFoot)
-                    tempLowerRandomRange--;
-                if(newSpin.baseType=='l')
-                    tempUpperRandomRange = 3;
+                else if(randomSelect==1)
+                {
+                    //add spin feature
+                    int randomSelect2;
+                    int tempLowerRandomRange = 1;
+                    int tempUpperRandomRange = 2;
+                    if(newSpin.isChangeFoot)
+                        tempLowerRandomRange--;
+                    if(newSpin.baseType=='l')
+                        tempUpperRandomRange = 3;
 
-                randomSelect2 = easyRandom::range(tempLowerRandomRange,tempUpperRandomRange);
-                if(randomSelect2==0 && !newSpin.features.changeFootByJump) //changeFootByJump
-                {
-                    newSpin.features.changeFootByJump = true;
-                    break;
-                }
-                else if(randomSelect2==1 &&
-                !newSpin.features.difficultExit &&
-                !newSpin.features.difficultEntrance) //difficultEntrance
-                {
-                    newSpin.features.difficultEntrance = true;
-                    break;
-                }
-                else if(randomSelect2==2 &&
-                !newSpin.features.difficultExit &&
-                !newSpin.features.difficultEntrance) //difficultExit
-                {
-                    newSpin.features.difficultExit = true;
-                    break;
-                }
-                else if(randomSelect2==3) //biellmann after layback
-                {
-                    SpinSegment* randomSegment = spin_addLevelRandomly_pickRandomSegment(newSpin);
-                    if(randomSegment->features.biellmannAfterLayback)
+                    randomSelect2 = easyRandom::range(tempLowerRandomRange,tempUpperRandomRange);
+                    if(randomSelect2==0 && !newSpin.features.changeFootByJump) //changeFootByJump
+                    {
+                        newSpin.features.changeFootByJump = true;
+                        break;
+                    }
+                    else if(randomSelect2==1 &&
+                    !newSpin.features.difficultExit &&
+                    !newSpin.features.difficultEntrance) //difficultEntrance
+                    {
+                        newSpin.features.difficultEntrance = true;
+                        break;
+                    }
+                    else if(randomSelect2==2 &&
+                    !newSpin.features.difficultExit &&
+                    !newSpin.features.difficultEntrance) //difficultExit
+                    {
+                        newSpin.features.difficultExit = true;
+                        break;
+                    }
+                    else if(randomSelect2==3) //biellmann after layback
+                    {
+                        SpinSegment* randomSegment = spin_addLevelRandomly_pickExistingSegment(newSpin);
+                        if(randomSegment->features.biellmannAfterLayback)
+                            continue;
+                        randomSegment->features.biellmannAfterLayback = true;
+                        break;
+                    }
+                    else
                         continue;
-                    randomSegment->features.biellmannAfterLayback = true;
-                    break;
                 }
-                else
-                    continue;
-            }
-            else if(randomSelect==2)
-            {
-                //add position feature
-                SpinPosition* randomPosition = spin_addLevelRandomly_pickRandomPosition(newSpin);
-                char randomFeature = randomPosition->pickRandomFeature();
-                if(newSpin.featureUsed(randomFeature))
-                    continue;
-                else
+                else if(randomSelect==2)
                 {
+                    //add position feature
+                    SpinPosition* randomPosition = spin_addLevelRandomly_pickExistingPosition(newSpin);
+                    char randomFeature = randomPosition->pickRandomFeature();
+                    if(newSpin.featureUsed(randomFeature))
+                        continue;
                     randomPosition->features.push_back(randomFeature);
                     break;
                 }
-            }
-            else if(randomSelect==3) //only occurs in combo spins (see pickRandomAddition sub-function for logic)
-            {
-                //add intermediate position
-                if(newSpin.intermediatePositionFlag)
-                    continue;
-                else
+                else if(randomSelect==3) //only occurs in combo spins (see pickRandomAddition sub-function for logic)
                 {
-                    SpinSegment* randomSegment = spin_addLevelRandomly_pickRandomSegment(newSpin);
-                    int randomSpinPositionIndex = easyRandom::range(0,randomSegment->spinPositions.size()-1);
-                    randomSegment->spinPositions.insert(randomSegment->spinPositions.begin()+randomSpinPositionIndex+1,SpinPosition('i'));
-                    newSpin.intermediatePositionFlag = true;
-                    break;
-                }
-            }
-            else if(randomSelect==4) //change of direction (only for change foot spins)
-            {
-                if(newSpin.changeDirectionFlag)
-                    continue;
-                else
-                {
-                    if(easyRandom::range(0,1))
-                        newSpin.spinSegments.at(0).swapDirection();
+                    //add intermediate position
+                    if(newSpin.intermediatePositionFlag)
+                        continue;
                     else
-                        newSpin.spinSegments.at(1).swapDirection();
-                    if(easyRandom::range(0,1))
-                        newSpin.spinSegments.at(1).swapFootness();
-                    newSpin.changeDirectionFlag = true;
-                    break;
+                    {
+                        SpinSegment* randomSegment = spin_addLevelRandomly_pickExistingSegment(newSpin);
+                        int randomSpinPositionIndex = easyRandom::range(0,randomSegment->spinPositions.size()-1);
+                        randomSegment->spinPositions.insert(randomSegment->spinPositions.begin()+randomSpinPositionIndex+1,SpinPosition('i'));
+                        newSpin.intermediatePositionFlag = true;
+                        break;
+                    }
                 }
+                else if(randomSelect==4) //change of direction (only for change foot spins)
+                {
+                    if(newSpin.changeDirectionFlag)
+                        continue;
+                    else
+                    {
+                        if(easyRandom::range(0,1))
+                            newSpin.spinSegments.at(0).swapDirection();
+                        else
+                            newSpin.spinSegments.at(1).swapDirection();
+                        if(easyRandom::range(0,1))
+                            newSpin.spinSegments.at(1).swapFootness();
+                        newSpin.changeDirectionFlag = true;
+                        break;
+                    }
+                }
+                else
+                    throw; //implies that randomSelect is outside of possible spin additions (this would be a bug)
             }
-            else
-                throw; //implies that randomSelect is outside of possible spin additions (this would be a bug)
         }
         newSpin.level++;
-    }
-    else if(newSpin.level==4) //level four spins have extra special rules because reasons
-    {
-
     }
 }
 int SpinSpinner::spin_addLevelRandomly_pickRandomAddition(Spin& newSpin)
@@ -508,12 +508,12 @@ int SpinSpinner::spin_addLevelRandomly_pickRandomAddition(Spin& newSpin)
             return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB});
     }
 }
-SpinSegment* SpinSpinner::spin_addLevelRandomly_pickRandomSegment(Spin& newSpin)
+SpinSegment* SpinSpinner::spin_addLevelRandomly_pickExistingSegment(Spin& newSpin)
 {
     int randomSegmentIndex = easyRandom::range(0,newSpin.spinSegments.size()-1);
     return &newSpin.spinSegments.at(randomSegmentIndex);
 }
-SpinPosition* SpinSpinner::spin_addLevelRandomly_pickRandomPosition(Spin& newSpin)
+SpinPosition* SpinSpinner::spin_addLevelRandomly_pickExistingPosition(Spin& newSpin)
 {
     if(!newSpin.isChangeFoot) //not change foot spin
     {
@@ -541,7 +541,71 @@ SpinPosition* SpinSpinner::spin_addLevelRandomly_pickRandomPosition(Spin& newSpi
             return &newSpin.spinSegments.at(randomSegmentIndex).spinPositions.at(randomIndex);
         }
         else
-            throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total
+            throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total in change foot spins
+    }
+}
+bool SpinSpinner::spin_addLevelRandomly_missingBulletForLevel4(Spin& newSpin)
+{
+    if(spin_checkForDifficultChangeOfPosition(newSpin)||//1. difficult change of position
+        newSpin.features.difficultExit||                //2. difficult exit
+        newSpin.featureUsed('c')||                      //3. change of edge
+        newSpin.changeDirectionFlag||                   //4. opposite directions immediately following each other
+        newSpin.featureUsed('s')||                      //5. clear increase in speed
+        (newSpin.isFlying && newSpin.features.difficultEntrance)) //6. difficult variation of flying entry
+    {
+        return false;
+    }
+    return true;
+}
+void SpinSpinner::spin_addLevelRandomly_addARequiredBulletForLevel4(Spin& newSpin)
+{
+    while(true) //keep looping until the rolled "spin addition" (variation/features) doesn't conflict with any other additions (lazy implementation)
+    {
+        int randomSelect = easyRandom::pickFromVector(std::vector<int>{0,1,2,3,4});
+
+        if(randomSelect==0)
+        {
+            if(newSpin.features.difficultEntrance && !newSpin.isFlying)
+                continue;
+            newSpin.features.difficultExit = true;
+            break;
+        }
+        else if(randomSelect==1)
+        {
+            //TODO: make this weighted against adding multiple features to same position
+            SpinPosition* randomPosition = spin_addLevelRandomly_pickExistingPosition(newSpin);
+            randomPosition->features.push_back('c');
+            break;
+        }
+        else if(randomSelect==2)
+        {
+            if(newSpin.spinSegments.size()<2)
+                continue;
+            else
+            {
+                if(easyRandom::range(0,1))
+                    newSpin.spinSegments.at(0).swapDirection();
+                else
+                    newSpin.spinSegments.at(1).swapDirection();
+                if(easyRandom::range(0,1))
+                    newSpin.spinSegments.at(1).swapFootness();
+                newSpin.changeDirectionFlag = true;
+                break;
+            }
+        }
+        else if(randomSelect==3)
+        {
+            //TODO: make this weighted against adding multiple features to same position
+            SpinPosition* randomPosition = spin_addLevelRandomly_pickExistingPosition(newSpin);
+            randomPosition->features.push_back('s');
+        }
+        else if(randomSelect==4)
+        {
+            if(!newSpin.isFlying)
+                continue;
+            newSpin.features.difficultEntrance;
+            break;
+        }
     }
 }
 bool SpinSpinner::spin_checkForDifficultChangeOfPosition(Spin& newSpin)

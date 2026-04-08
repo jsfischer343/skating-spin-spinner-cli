@@ -44,11 +44,15 @@ class SpinSpinner
             std::string spin_spinInOnePosition(char spinType, int level);
             std::string spin_combo(int level);
                 void spin_combo_addComboPosition(Spin& newSpin, int level);
+
             void spin_decideRandomBaseQualities(Spin& newSpin);
             void spin_addLevelRandomly(Spin& newSpin);
                 int spin_addLevelRandomly_pickRandomAddition(Spin& newSpin);
-                SpinSegment* spin_addLevelRandomly_pickRandomSegment(Spin& newSpin);
-                SpinPosition* spin_addLevelRandomly_pickRandomPosition(Spin& newSpin);
+                SpinSegment* spin_addLevelRandomly_pickExistingSegment(Spin& newSpin);
+                SpinPosition* spin_addLevelRandomly_pickExistingPosition(Spin& newSpin);
+                bool spin_addLevelRandomly_missingBulletForLevel4(Spin& newSpin);
+                void spin_addLevelRandomly_addARequiredBulletForLevel4(Spin& newSpin);
+
             bool spin_checkForDifficultChangeOfPosition(Spin& newSpin);
 
     public:
