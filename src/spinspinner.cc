@@ -1,6 +1,9 @@
 #include "spinspinner.hh"
 
-
+SpinSpinner::SpinSpinner(bool defaultDirection)
+{
+    this->defaultDirection = defaultDirection;
+}
 void SpinSpinner::spin()
 {
     targetLevel = easyRandom::range(0,4);
@@ -313,11 +316,11 @@ void SpinSpinner::initializeBaseStructure()
 
     if(currentSpin.isChangeFoot)
     {
-        currentSpin.spinSegments.push_back(SpinSegment(startingFootness,startingPositions));
-        currentSpin.spinSegments.push_back(SpinSegment(otherFootness,startingPositions));
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness,startingPositions));
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,otherFootness,startingPositions));
     }
     else
-        currentSpin.spinSegments.push_back(SpinSegment(startingFootness,startingPositions));
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness,startingPositions));
 }
 void SpinSpinner::addLevel()
 {

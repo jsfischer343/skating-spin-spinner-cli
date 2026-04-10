@@ -39,7 +39,10 @@
 class SpinSpinner
 {
     public:
+        bool defaultDirection = false; //false: counter-clockwise, true: clockwise
         std::vector<Spin> spinHistory = {}; //every time one of the spin functions is called it will push to this list
+
+        SpinSpinner(bool defaultDirection);
 
         void spin(); //as in the act of spinning a wheel
         void spin(int level);

@@ -1,13 +1,21 @@
 #include "spinsegment.hh"
 
-SpinSegment::SpinSegment(char footness)
+SpinSegment::SpinSegment(bool defaultDirection, char footness)
 {
     this->footness = footness;
+    if(defaultDirection)
+        this->direction = 'l';
+    else
+        this->direction = 'r';
 }
-SpinSegment::SpinSegment(char footness, std::vector<SpinPosition> spinPositions)
+SpinSegment::SpinSegment(bool defaultDirection, char footness, std::vector<SpinPosition> spinPositions)
 {
     this->footness = footness;
     this->spinPositions = spinPositions;
+    if(defaultDirection)
+        this->direction = 'l';
+    else
+        this->direction = 'r';
 }
 void SpinSegment::swapDirection()
 {

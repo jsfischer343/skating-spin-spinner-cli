@@ -74,6 +74,7 @@ int main(int argc, char* argv[]) {
     p.add("-l", "--level",  "Spin level (numeric 0-4)");
     p.add("-t", "--type",   "Type of spin (any, camel, sit, upright, layback, combo)");
     p.add("-n", "--number", "Number spins spun (between 1-100)");
+    p.add("-r", "--reverse","Sets default direction to clockwise instead of counter-clockwise", ap::mode::BOOLEAN);
     p.add("-c", "--code",   "Prints spin as code rather than human readable", ap::mode::BOOLEAN);
 
     ap::argmap args = p.parse();
@@ -85,7 +86,7 @@ int main(int argc, char* argv[]) {
 
     validateInput(args);
 
-    SpinSpinner spinSpinnerObj = SpinSpinner();
+    SpinSpinner spinSpinnerObj = SpinSpinner(std::stoi(args["--reverse"]));
     int spinLevel = std::stoi(args["--level"]); //if empty it will be set to 0 by validateInput()
     std::string spinType = args["--type"];
     int numberOfSpins = std::stoi(args["--number"]);

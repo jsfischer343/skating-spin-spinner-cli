@@ -27,8 +27,8 @@ class SpinSegment
 
 
         //functions
-        SpinSegment(char footness);
-        SpinSegment(char footness, std::vector<SpinPosition> spinPositions);
+        SpinSegment(bool defaultDirection, char footness);
+        SpinSegment(bool defaultDirection, char footness, std::vector<SpinPosition> spinPositions);
 
         void swapDirection();
         void swapFootness();
