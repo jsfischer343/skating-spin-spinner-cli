@@ -4,6 +4,24 @@ SpinPosition::SpinPosition(char position)
 {
     this->position = position;
 }
+bool SpinPosition::hasVariation(char variation) const
+{
+    for(size_t i=0;i<variations.size();i++)
+    {
+        if(variations.at(i)==variation)
+            return true;
+    }
+    return false;
+}
+bool SpinPosition::hasFeature(char feature) const
+{
+    for(size_t i=0;i<features.size();i++)
+    {
+        if(features.at(i)==feature)
+            return true;
+    }
+    return false;
+}
 char SpinPosition::pickRandomFeature() const
 {
     std::vector<char> validFeatures = {'b','c','j','8','s'};

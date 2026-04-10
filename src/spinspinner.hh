@@ -26,6 +26,10 @@
 #define ADD_INTERMEDIATE_POSITION_PROB 0.13 //only affects combo spins
 #define ADD_CHANGE_OF_DIRECTION_PROB 0.13
 
+//Probablitiy of allowing stacking features or variations on same position
+#define FEATURE_ON_SAME_POSITION_PROB 0.05
+#define VARIATION_ON_SAME_POSITION_PROB 0.8
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -62,6 +66,7 @@ class SpinSpinner
             SpinPosition* pickNonConflictingPosition();
             bool missingBulletForLevel4();
             void addARequiredBulletForLevel4();
+            bool checkFeatureValidity(SpinPosition* spinPosition, char featureInQuestion);
 
 
     public:

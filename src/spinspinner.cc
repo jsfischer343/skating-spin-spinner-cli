@@ -413,6 +413,8 @@ bool SpinSpinner::addVariation()
     {
         if(currentSpin.twoVariationsFlag)
             return false;
+        if(!easyRandom::weightedTruth(VARIATION_ON_SAME_POSITION_PROB) && !randomPosition->variations.empty()) //reduce the chance of stacking variations on the same position
+            return false;
         else
         {
             if(currentSpin.variationUsed(randomPosition->position,randomVariation))
@@ -444,7 +446,7 @@ bool SpinSpinner::addSpinFeature()
         return true;
     }
     else if(randomSelect==1 &&
-    !currentSpin.features.difficultExit &&
+    (!currentSpin.features.difficultExit || currentSpin.isFlying) &&
     !currentSpin.features.difficultEntrance) //difficultEntrance
     {
         currentSpin.features.difficultEntrance = true;
@@ -452,7 +454,7 @@ bool SpinSpinner::addSpinFeature()
     }
     else if(randomSelect==2 &&
     !currentSpin.features.difficultExit &&
-    !currentSpin.features.difficultEntrance) //difficultExit
+    (!currentSpin.features.difficultEntrance || currentSpin.isFlying)) //difficultExit
     {
         currentSpin.features.difficultExit = true;
         return true;
@@ -473,6 +475,8 @@ bool SpinSpinner::addPositionFeature()
     SpinPosition* randomPosition = pickNonConflictingPosition();
     char randomFeature = randomPosition->pickRandomFeature();
     if(currentSpin.featureUsed(randomFeature))
+        return false;
+    if(!checkFeatureValidity(randomPosition,randomFeature))
         return false;
     randomPosition->features.push_back(randomFeature);
     return true;
@@ -579,8 +583,9 @@ void SpinSpinner::addARequiredBulletForLevel4()
         }
         else if(randomSelect==1)
         {
-            //TODO: make this weighted against adding multiple features to same position
             SpinPosition* randomPosition = pickNonConflictingPosition();
+            if(!checkFeatureValidity(randomPosition,'c'))
+                continue;
             randomPosition->features.push_back('c');
             break;
         }
@@ -602,8 +607,9 @@ void SpinSpinner::addARequiredBulletForLevel4()
         }
         else if(randomSelect==3)
         {
-            //TODO: make this weighted against adding multiple features to same position
             SpinPosition* randomPosition = pickNonConflictingPosition();
+            if(!checkFeatureValidity(randomPosition,'s'))
+                continue;
             randomPosition->features.push_back('s');
             break;
         }
@@ -615,6 +621,32 @@ void SpinSpinner::addARequiredBulletForLevel4()
             break;
         }
     }
+}
+bool SpinSpinner::checkFeatureValidity(SpinPosition* spinPosition, char featureInQuestion)
+{
+    if(spinPosition->position=='u')
+    {
+        if(spinPosition->variations.empty())
+        {
+            if(featureInQuestion=='c') //coe on base upright not counted as level
+                return false;
+            if(featureInQuestion=='s') //speed on base upright not counted as level
+                return false;
+            if(featureInQuestion=='8') //8rev on base upright not counted as level
+                return false;
+        }
+        if(spinPosition->hasVariation('b') && featureInQuestion=='s') //speed on cross foot not counted as level
+            return false;
+    }
+    if(spinPosition->position=='s')
+    {
+        if(spinPosition->variations.empty() && featureInQuestion=='8')
+            return false;
+    }
+
+    if(!easyRandom::weightedTruth(FEATURE_ON_SAME_POSITION_PROB) && !spinPosition->features.empty()) //reduce the chance of stacking features on the same position
+        return false;
+    return true;
 }
 std::string SpinSpinner::spinHistoryToCode()
 {

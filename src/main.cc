@@ -30,7 +30,7 @@ void validateInput(ap::argmap& args)
     std::vector<std::string> validLevels = {"0","1","2","3","4"};
     if(args["--level"].empty())
     {
-        args["--level"] = "0";
+        args["--level"] = easyRandom::pickFromVector(validLevels);
         levelValid = true;
     }
     else

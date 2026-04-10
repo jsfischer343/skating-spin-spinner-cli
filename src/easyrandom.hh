@@ -43,7 +43,14 @@ namespace easyRandom
         return vectorToPickFrom.at(range(0,vectorToPickFrom.size()-1));
     }
 
-    inline int pickFromVector(const std::vector<char>& vectorToPickFrom)
+    inline char pickFromVector(const std::vector<char>& vectorToPickFrom)
+    {
+        if(vectorToPickFrom.size()==0)
+            return 0;
+        return vectorToPickFrom.at(range(0,vectorToPickFrom.size()-1));
+    }
+
+    inline std::string pickFromVector(const std::vector<std::string>& vectorToPickFrom)
     {
         if(vectorToPickFrom.size()==0)
             return 0;

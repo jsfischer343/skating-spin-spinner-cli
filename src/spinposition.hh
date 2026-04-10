@@ -23,6 +23,8 @@ class SpinPosition
         //functions
         SpinPosition(char position);
 
+        bool hasVariation(char variation) const;
+        bool hasFeature(char feature) const;
         char pickRandomFeature() const;
         char pickRandomVariation() const;
 

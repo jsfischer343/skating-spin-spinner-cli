@@ -154,10 +154,15 @@ std::string Spin::prettyPrint() const
     }
 
     //final modifiers
-    if(this->features.difficultEntrance)
-        resultString += " with difficult entrance";
-    if(this->features.difficultExit)
-        resultString += " with difficult exit";
+    if(this->features.difficultEntrance && this->features.difficultExit)
+        resultString += " with difficult entrance & exit";
+    else
+    {
+        if(this->features.difficultEntrance)
+            resultString += " with difficult entrance";
+        if(this->features.difficultExit)
+            resultString += " with difficult exit";
+    }
 
     return resultString;
 }
