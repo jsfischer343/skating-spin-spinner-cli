@@ -1,4 +1,4 @@
-version = 0.1
+version = 1.0
 all:
 	g++ ./src/main.cc ./src/spinspinner.cc ./src/spin.cc ./src/spinposition.cc ./src/spinsegment.cc -o spinspinner
 debug:
