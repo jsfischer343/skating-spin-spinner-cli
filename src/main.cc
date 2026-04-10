@@ -18,7 +18,7 @@ void validateInput(ap::argmap& args)
     }
     else
     {
-        for(int i=0;i<validSpinTypes.size();i++)
+        for(size_t i=0;i<validSpinTypes.size();i++)
         {
             if(args["--type"]==validSpinTypes.at(i))
                 spinTypeValid = true;
@@ -35,7 +35,7 @@ void validateInput(ap::argmap& args)
     }
     else
     {
-        for(int i=0;i<validLevels.size();i++)
+        for(size_t i=0;i<validLevels.size();i++)
         {
             if(args["--level"]==validLevels.at(i))
                 levelValid = true;
@@ -58,8 +58,7 @@ void validateInput(ap::argmap& args)
                numberValid = true;
         }
     }
-    catch (std::invalid_argument e)
-    {/*Then by default the number is invalid*/}
+    catch (std::invalid_argument e){}; //numberValid = false by default
 
     if(!spinTypeValid || !levelValid || !numberValid)
     {

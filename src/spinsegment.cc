@@ -26,7 +26,7 @@ void SpinSegment::swapFootness()
 std::vector<char> SpinSegment::getUsedPositions() const
 {
     std::vector<char> usedPositions;
-    for(int i=0;i<spinPositions.size();i++)
+    for(size_t i=0;i<spinPositions.size();i++)
     {
         usedPositions.push_back(spinPositions.at(i).position);
     }
@@ -37,7 +37,7 @@ int SpinSegment::getBullets() const
     int sumOfBullets = 0;
 
     //count features and variations on spin positions
-    for(int i=0;i<spinPositions.size();i++)
+    for(size_t i=0;i<spinPositions.size();i++)
     {
         sumOfBullets += spinPositions.at(i).variations.size();
         sumOfBullets += spinPositions.at(i).features.size();
@@ -50,6 +50,22 @@ int SpinSegment::getBullets() const
         sumOfBullets++;
 
     return sumOfBullets;
+}
+bool SpinSegment::hasDifficultChangeOfPosition() const
+{
+    for(size_t i=1;i<this->spinPositions.size();i++)
+    {
+        char previousPosition = this->spinPositions.at(i-1).position;
+        char currentPosition = this->spinPositions.at(i).position;
+        if(previousPosition=='s'||previousPosition=='u')
+        {
+            if(currentPosition=='c')
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 std::string SpinSegment::getDirectionString() const
 {
@@ -83,7 +99,7 @@ std::string SpinSegment::toCode() const
     else if(this->footness=='f')
         resultString += "Fw";
 
-    for(int i=0;i<spinPositions.size();i++)
+    for(size_t i=0;i<spinPositions.size();i++)
     {
         resultString += spinPositions.at(i).toCode();
         if(i!=spinPositions.size()-1)
@@ -111,7 +127,7 @@ std::string SpinSegment::prettyPrint() const
     else if(this->footness=='f')
         resultString += "forward ";
 
-    for(int i=0;i<spinPositions.size();i++)
+    for(size_t i=0;i<spinPositions.size();i++)
     {
         resultString += spinPositions.at(i).prettyPrint();
         if(i!=spinPositions.size()-1)

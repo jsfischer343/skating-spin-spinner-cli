@@ -12,7 +12,7 @@ namespace easyRandom
 {
     inline int range(const int min, const int max)
     {
-        srand(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
+        srand(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
         std::mt19937 mt19937Obj;
         std::uniform_int_distribution<std::mt19937::result_type> udist(min, max);
         std::mt19937::result_type const seedval = rand();
@@ -57,11 +57,11 @@ namespace easyRandom
 
         int sumOfWeights = 0;
         std::vector<double> sequentialVectorOfAbsoluteWeightMarks;
-        for(int i=0;i<vectorOfWeights.size();i++)
+        for(size_t i=0;i<vectorOfWeights.size();i++)
         {
             sumOfWeights += vectorOfWeights.at(i);
         }
-        for(int i=0;i<vectorOfWeights.size();i++)
+        for(size_t i=0;i<vectorOfWeights.size();i++)
         {
             sequentialVectorOfAbsoluteWeightMarks.push_back(((double)vectorOfWeights.at(i)/sumOfWeights));
             if(i!=0)
@@ -71,7 +71,7 @@ namespace easyRandom
         double randomLessThanOne = (double)range(0,RAND_MAX)/RAND_MAX;
         if(randomLessThanOne>=0 && randomLessThanOne<=sequentialVectorOfAbsoluteWeightMarks.at(0))
             return vectorToPickFrom.at(0);
-        for(int i=0;i<sequentialVectorOfAbsoluteWeightMarks.size()-1;i++)
+        for(size_t i=0;i<sequentialVectorOfAbsoluteWeightMarks.size()-1;i++)
         {
             if(randomLessThanOne>sequentialVectorOfAbsoluteWeightMarks.at(i) && randomLessThanOne<=sequentialVectorOfAbsoluteWeightMarks.at(i+1))
                 return vectorToPickFrom.at(i+1);
@@ -86,11 +86,11 @@ namespace easyRandom
 
         double sumOfWeights = 0;
         std::vector<double> sequentialVectorOfAbsoluteWeightMarks;
-        for(int i=0;i<vectorOfWeights.size();i++)
+        for(size_t i=0;i<vectorOfWeights.size();i++)
         {
             sumOfWeights += vectorOfWeights.at(i);
         }
-        for(int i=0;i<vectorOfWeights.size();i++)
+        for(size_t i=0;i<vectorOfWeights.size();i++)
         {
             sequentialVectorOfAbsoluteWeightMarks.push_back((vectorOfWeights.at(i)/sumOfWeights));
             if(i!=0)
@@ -100,7 +100,7 @@ namespace easyRandom
         double randomLessThanOne = (double)range(0,RAND_MAX)/RAND_MAX;
         if(randomLessThanOne>=0 && randomLessThanOne<=sequentialVectorOfAbsoluteWeightMarks.at(0))
             return vectorToPickFrom.at(0);
-        for(int i=0;i<sequentialVectorOfAbsoluteWeightMarks.size()-1;i++)
+        for(size_t i=0;i<sequentialVectorOfAbsoluteWeightMarks.size()-1;i++)
         {
             if(randomLessThanOne>sequentialVectorOfAbsoluteWeightMarks.at(i) && randomLessThanOne<=sequentialVectorOfAbsoluteWeightMarks.at(i+1))
                 return vectorToPickFrom.at(i+1);
@@ -115,11 +115,11 @@ namespace easyRandom
 
         double sumOfWeights = 0;
         std::vector<double> sequentialVectorOfAbsoluteWeightMarks;
-        for(int i=0;i<vectorOfWeights.size();i++)
+        for(size_t i=0;i<vectorOfWeights.size();i++)
         {
             sumOfWeights += vectorOfWeights.at(i);
         }
-        for(int i=0;i<vectorOfWeights.size();i++)
+        for(size_t i=0;i<vectorOfWeights.size();i++)
         {
             sequentialVectorOfAbsoluteWeightMarks.push_back((vectorOfWeights.at(i)/sumOfWeights));
             if(i!=0)
@@ -129,7 +129,7 @@ namespace easyRandom
         double randomLessThanOne = (double)range(0,RAND_MAX)/RAND_MAX;
         if(randomLessThanOne>=0 && randomLessThanOne<=sequentialVectorOfAbsoluteWeightMarks.at(0))
             return vectorToPickFrom.at(0);
-        for(int i=0;i<sequentialVectorOfAbsoluteWeightMarks.size()-1;i++)
+        for(size_t i=0;i<sequentialVectorOfAbsoluteWeightMarks.size()-1;i++)
         {
             if(randomLessThanOne>sequentialVectorOfAbsoluteWeightMarks.at(i) && randomLessThanOne<=sequentialVectorOfAbsoluteWeightMarks.at(i+1))
                 return vectorToPickFrom.at(i+1);

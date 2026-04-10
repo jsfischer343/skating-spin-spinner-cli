@@ -1,17 +1,13 @@
 #include "spin.hh"
 
-Spin::Spin(char baseType)
-{
-    this->baseType = baseType;
-}
 bool Spin::hasAllPrimaryPositions() const
 {
     bool hasCamel = false;
     bool hasSit = false;
     bool hasUpright = false;
-    for(int i=0;i<spinSegments.size();i++)
+    for(size_t i=0;i<spinSegments.size();i++)
     {
-        for(int j=0;j<spinSegments.at(i).spinPositions.size();j++)
+        for(size_t j=0;j<spinSegments.at(i).spinPositions.size();j++)
         {
             if(spinSegments.at(i).spinPositions.at(j).position=='c')
                 hasCamel = true;
@@ -28,7 +24,7 @@ bool Spin::hasAllPrimaryPositions() const
 int Spin::getTotalPositions() const
 {
     int sum = 0;
-    for(int i=0;i<spinSegments.size();i++)
+    for(size_t i=0;i<spinSegments.size();i++)
     {
         sum += spinSegments.at(i).spinPositions.size();
     }
@@ -36,11 +32,11 @@ int Spin::getTotalPositions() const
 }
 bool Spin::variationUsed(char positionChar, char variationChar) const
 {
-    for(int i=0;i<spinSegments.size();i++)
+    for(size_t i=0;i<spinSegments.size();i++)
     {
-        for(int j=0;j<spinSegments.at(i).spinPositions.size();j++)
+        for(size_t j=0;j<spinSegments.at(i).spinPositions.size();j++)
         {
-            for(int k=0;k<spinSegments.at(i).spinPositions.at(j).variations.size();k++)
+            for(size_t k=0;k<spinSegments.at(i).spinPositions.at(j).variations.size();k++)
             {
                 if(spinSegments.at(i).spinPositions.at(j).position==positionChar && spinSegments.at(i).spinPositions.at(j).variations.at(k)==variationChar)
                     return true;
@@ -51,11 +47,11 @@ bool Spin::variationUsed(char positionChar, char variationChar) const
 }
 bool Spin::featureUsed(char featureChar) const
 {
-    for(int i=0;i<spinSegments.size();i++)
+    for(size_t i=0;i<spinSegments.size();i++)
     {
-        for(int j=0;j<spinSegments.at(i).spinPositions.size();j++)
+        for(size_t j=0;j<spinSegments.at(i).spinPositions.size();j++)
         {
-            for(int k=0;k<spinSegments.at(i).spinPositions.at(j).features.size();k++)
+            for(size_t k=0;k<spinSegments.at(i).spinPositions.at(j).features.size();k++)
             {
                 if(spinSegments.at(i).spinPositions.at(j).features.at(k)==featureChar)
                     return true;
@@ -67,15 +63,24 @@ bool Spin::featureUsed(char featureChar) const
 bool Spin::hasTwoVariations() const
 {
     int variationCount = 0;
-    for(int i=0;i<spinSegments.size();i++)
+    for(size_t i=0;i<spinSegments.size();i++)
     {
-        for(int j=0;j<spinSegments.at(i).spinPositions.size();j++)
+        for(size_t j=0;j<spinSegments.at(i).spinPositions.size();j++)
         {
             variationCount += spinSegments.at(i).spinPositions.at(j).variations.size();
         }
     }
     if(variationCount>=2)
         return true;
+    return false;
+}
+bool Spin::hasDifficultChangeOfPosition() const
+{
+    for(size_t i=0;i<this->spinSegments.size();i++)
+    {
+        if(this->spinSegments.at(i).hasDifficultChangeOfPosition())
+            return true;
+    }
     return false;
 }
 std::string Spin::toCode() const
@@ -103,7 +108,7 @@ std::string Spin::toCode() const
         resultString += this->spinSegments.at(1).toCode();
 
         //any remaining segments?
-        for(int i=2;i<spinSegments.size();i++)
+        for(size_t i=2;i<spinSegments.size();i++)
         {
             resultString += this->spinSegments.at(i).toCode();
         }
@@ -142,7 +147,7 @@ std::string Spin::prettyPrint() const
         resultString += this->spinSegments.at(1).prettyPrint();
 
         //any remaining segments?
-        for(int i=2;i<spinSegments.size();i++)
+        for(size_t i=2;i<spinSegments.size();i++)
         {
             resultString += this->spinSegments.at(i).prettyPrint();
         }

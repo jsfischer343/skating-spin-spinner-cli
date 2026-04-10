@@ -35,25 +35,34 @@
 class SpinSpinner
 {
     public:
-        std::vector<Spin> spinHistory;
+        std::vector<Spin> spinHistory = {}; //every time one of the spin functions is called it will push to this list
 
-        std::string spin(); //as in the act of spinning a wheel
-        std::string spin(int level);
-        std::string spin(char spinType, int level);
+        void spin(); //as in the act of spinning a wheel
+        void spin(int level);
+        void spin(char spinType, int level);
     private:
-            std::string spin_spinInOnePosition(char spinType, int level);
-            std::string spin_combo(int level);
-                void spin_combo_addComboPosition(Spin& newSpin, int level);
+        int targetLevel = 0; //the target level for the currentSpin being generated
+        Spin currentSpin;
+        void generateSpin();
+            void generateSpinInOnePosition();
+            void generateCombo();
+                void generateComboPositions();
+                    void generateComboPositions_addPosition(bool swappedFeet);
 
-            void spin_decideRandomBaseQualities(Spin& newSpin);
-            void spin_addLevelRandomly(Spin& newSpin);
-                int spin_addLevelRandomly_pickRandomAddition(Spin& newSpin);
-                SpinSegment* spin_addLevelRandomly_pickExistingSegment(Spin& newSpin);
-                SpinPosition* spin_addLevelRandomly_pickExistingPosition(Spin& newSpin);
-                bool spin_addLevelRandomly_missingBulletForLevel4(Spin& newSpin);
-                void spin_addLevelRandomly_addARequiredBulletForLevel4(Spin& newSpin);
+        void setRandomBaseQualities(); //selects base qualities for the spin (think spin code)
+        void initializeBaseStructure(); //adds spin segements and starting positions for some spins
+        //main logic for adding levels
+        void addLevel();
+            bool addVariation();
+            bool addSpinFeature();
+            bool addPositionFeature();
+            bool addIntermediatePosition();
+            bool addChangeOfDirection();
+            int pickRandomBulletType();
+            SpinPosition* pickNonConflictingPosition();
+            bool missingBulletForLevel4();
+            void addARequiredBulletForLevel4();
 
-            bool spin_checkForDifficultChangeOfPosition(Spin& newSpin);
 
     public:
         std::string spinHistoryToCode();

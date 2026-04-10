@@ -4,18 +4,6 @@ SpinPosition::SpinPosition(char position)
 {
     this->position = position;
 }
-bool SpinPosition::hasVariation() const
-{
-    if(variations.size()==0)
-        return false;
-    return true;
-}
-bool SpinPosition::hasFeature() const
-{
-    if(features.size()==0)
-        return false;
-    return true;
-}
 char SpinPosition::pickRandomFeature() const
 {
     std::vector<char> validFeatures = {'b','c','j','8','s'};
@@ -49,15 +37,7 @@ char SpinPosition::pickRandomVariation() const
     {
         validVariations = {'s','b'}; //layback up?
     }
-    std::vector<char> usedVariations = variations;
-    std::vector<char> unusedVariations;
-    std::sort(validVariations.begin(),validVariations.end());
-    std::sort(usedVariations.begin(),usedVariations.end());
-    std::set_difference(validVariations.begin(),validVariations.end(),usedVariations.begin(),usedVariations.end(),std::back_inserter(unusedVariations));
-    if(unusedVariations.empty())
-        return -1;
-    else
-        return easyRandom::pickFromVector(unusedVariations);
+    return easyRandom::pickFromVector(validVariations);
 }
 std::string SpinPosition::toCode() const
 {
@@ -113,7 +93,7 @@ std::string SpinPosition::getVariationString(bool codeFormat) const
     std::string variationString = "";
     if(codeFormat)
     {
-        for(int i=0;i<variations.size();i++)
+        for(size_t i=0;i<variations.size();i++)
         {
             if(variations.at(i)=='u')
                 variationString += "Up";
@@ -127,7 +107,7 @@ std::string SpinPosition::getVariationString(bool codeFormat) const
     }
     else
     {
-        for(int i=0;i<variations.size();i++)
+        for(size_t i=0;i<variations.size();i++)
         {
             if(variations.at(i)=='u')
                 variationString += "up";
@@ -148,7 +128,7 @@ std::string SpinPosition::getFeatureString(bool codeFormat) const
     std::string featureString = "";
     if(codeFormat)
     {
-        for(int i=0;i<features.size();i++)
+        for(size_t i=0;i<features.size();i++)
         {
             if(features.at(i)=='b')
                 featureString += "Bl";
@@ -164,7 +144,7 @@ std::string SpinPosition::getFeatureString(bool codeFormat) const
     }
     else
     {
-        for(int i=0;i<features.size();i++)
+        for(size_t i=0;i<features.size();i++)
         {
             if(features.at(i)=='b')
                 featureString += "blade";

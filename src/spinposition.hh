@@ -20,10 +20,9 @@ class SpinPosition
         std::vector<char> features = {}; //features that are associated with a specific position (see spin features)
 
 
+        //functions
         SpinPosition(char position);
 
-        bool hasVariation() const;
-        bool hasFeature() const;
         char pickRandomFeature() const;
         char pickRandomVariation() const;
 
