@@ -30,6 +30,9 @@
 #define FEATURE_ON_SAME_POSITION_PROB 0.05
 #define VARIATION_ON_SAME_POSITION_PROB 0.8
 
+//Misc probabilities
+#define WINDMILL_PROB 0.3
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -71,6 +74,7 @@ class SpinSpinner
             bool missingBulletForLevel4();
             void addARequiredBulletForLevel4();
             bool checkFeatureValidity(SpinPosition* spinPosition, char featureInQuestion);
+            bool shouldAvoidChangeFootByJump();
 
 
     public:
