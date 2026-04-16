@@ -1,8 +1,9 @@
 #include "spinspinner.hh"
 
-SpinSpinner::SpinSpinner(bool defaultDirection)
+SpinSpinner::SpinSpinner(bool defaultDirection, bool normalize)
 {
     this->defaultDirection = defaultDirection;
+    this->normalize = normalize;
 }
 void SpinSpinner::spin()
 {
@@ -462,15 +463,15 @@ bool SpinSpinner::addSpinFeature()
         currentSpin.features.difficultExit = true;
         return true;
     }
-    else if(randomSelect==3) //biellmann after layback
-    {
-        int randomSegmentIndex = easyRandom::range(0,currentSpin.spinSegments.size()-1);
-        SpinSegment* randomSegment = &currentSpin.spinSegments.at(randomSegmentIndex);
-        if(randomSegment->features.biellmannAfterLayback)
-            return false;
-        randomSegment->features.biellmannAfterLayback = true;
-        return true;
-    }
+    // else if(randomSelect==3) //biellmann after layback
+    // {
+    //     int randomSegmentIndex = easyRandom::range(0,currentSpin.spinSegments.size()-1);
+    //     SpinSegment* randomSegment = &currentSpin.spinSegments.at(randomSegmentIndex);
+    //     if(randomSegment->features.biellmannAfterLayback)
+    //         return false;
+    //     randomSegment->features.biellmannAfterLayback = true;
+    //     return true;
+    // }
     return false;
 }
 bool SpinSpinner::addPositionFeature()

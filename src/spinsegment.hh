@@ -21,7 +21,7 @@ class SpinSegment
         //segment specific features
         typedef struct {
             bool difficultChangeOfPosition = false; //sit or upright to camel spin
-            bool biellmannAfterLayback = false;
+            //bool biellmannAfterLayback = false;
         } SpinSegmentFeatures;
         SpinSegmentFeatures features;
 

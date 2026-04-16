@@ -38,22 +38,26 @@ char SpinPosition::pickRandomFeature() const
 char SpinPosition::pickRandomVariation() const
 {
     std::vector<char> validVariations;
-    //some variations may only be valid for some spins?
+    //for more details see "Singles Spin Difficult Variation Chart.pdf"
     if(position=='c')
     {
         validVariations = {'u','f','s'};
     }
     else if(position=='s')
     {
-        validVariations = {'u','f','b','s'};
+        validVariations = {'f','b','s'};
     }
     else if(position=='u')
     {
-        validVariations = {'u','f','b'}; //does a headless spin count as upright up?
+        validVariations = {'u','f','b','s'}; //does a headless spin count as upright up?
     }
     else if(position=='l')
     {
-        validVariations = {'s','b'}; //layback up?
+        validVariations = {'s','b','m'}; //is layback up a thing?
+    }
+    else if(position=='i')
+    {
+        validVariations = {'u','f','b','s'};
     }
     return easyRandom::pickFromVector(validVariations);
 }
@@ -70,7 +74,8 @@ std::string SpinPosition::prettyPrint() const
 {
     std::string resultString = "";
     resultString += getPositionString(false)+" ";
-    resultString += getVariationString(false);
+    if(variations.size()>0)
+        resultString += getVariationString(false)+" ";
     if(!this->features.empty())
         resultString += "("+getFeatureString(false)+")";
     return resultString;
@@ -121,6 +126,8 @@ std::string SpinPosition::getVariationString(bool codeFormat) const
                 variationString += "Fr";
             else if(variations.at(i)=='b')
                 variationString += "Be";
+            else if(variations.at(i)=='m')
+                variationString += "Bi";
         }
     }
     else
@@ -135,8 +142,10 @@ std::string SpinPosition::getVariationString(bool codeFormat) const
                 variationString += "front";
             else if(variations.at(i)=='b')
                 variationString += "behind";
+            else if(variations.at(i)=='m')
+                variationString += "biellmann";
             if(i!=variations.size()-1)
-                variationString += " & ";
+                variationString += " -> ";
         }
     }
     return variationString;

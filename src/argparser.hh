@@ -264,8 +264,6 @@ namespace ap {
             std::map<std::string, std::string> map;
             bool success = true;
 
-            bool help_passed = false;
-
             if (m_any_adds_failed) {
                 success = false;
             } else if (m_argc == 2 && (m_argv[1] == "-h" || m_argv[1] == "--help")) {

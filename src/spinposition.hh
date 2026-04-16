@@ -12,7 +12,7 @@ class SpinPosition
     public:
         /* --Valid Settings--
          * position: camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; intermediate -> 'i'
-         * variation: up -> 'u'; front -> 'f'; behind -> 'b'; side -> 's'
+         * variation: up -> 'u'; front -> 'f'; behind -> 'b'; side -> 's'; biellmann -> 'm'
          * features: blade -> 'b'; coe -> 'c'; jump -> 'j'; 8 revs -> '8'; speed -> 's'
          */
         char position = -1; //basic position: camel, sit, upright, layback, intermediate

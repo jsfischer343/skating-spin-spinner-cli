@@ -54,8 +54,8 @@ int SpinSegment::getBullets() const
     //count segement specific features
     if(features.difficultChangeOfPosition)
         sumOfBullets++;
-    if(features.biellmannAfterLayback)
-        sumOfBullets++;
+    // if(features.biellmannAfterLayback)
+    //     sumOfBullets++;
 
     return sumOfBullets;
 }
@@ -113,8 +113,8 @@ std::string SpinSegment::toCode() const
         if(i!=spinPositions.size()-1)
             resultString += "+";
     }
-    if(this->features.biellmannAfterLayback)
-        resultString += "Bi";
+    // if(this->features.biellmannAfterLayback)
+    //     resultString += "Bi";
     resultString += "]";
 
     return resultString;
@@ -141,8 +141,8 @@ std::string SpinSegment::prettyPrint() const
         if(i!=spinPositions.size()-1)
             resultString += " + ";
     }
-    if(this->features.biellmannAfterLayback)
-        resultString += " -> biellmann";
+    // if(this->features.biellmannAfterLayback)
+    //     resultString += " -> biellmann";
     resultString += " ]";
 
     return resultString;

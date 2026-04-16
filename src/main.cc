@@ -1,17 +1,17 @@
 /*Copyright (C) 2026, John Fischer
 *
-*This program is free software: you can redistribute it and/or modify
-*it under the terms of the GNU General Public License as published by
-*the Free Software Foundation, either version 3 of the License, or
-*(at your option) any later version.
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
 *
-*This program is distributed in the hope that it will be useful,
-*but WITHOUT ANY WARRANTY; without even the implied warranty of
-*MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*GNU General Public License for more details.
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
 *
-*You should have received a copy of the GNU General Public License
-*along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
 * Version: 1.0
 */
@@ -46,7 +46,7 @@ void validateInput(ap::argmap& args)
     //level
     bool levelValid = false;
     std::vector<std::string> validLevels = {"0","1","2","3","4"};
-    if(args["--level"].empty())
+    if(args["--level"].empty() || args["--level"]=="any")
     {
         args["--level"] = easyRandom::pickFromVector(validLevels);
         levelValid = true;
@@ -76,7 +76,7 @@ void validateInput(ap::argmap& args)
                numberValid = true;
         }
     }
-    catch (std::invalid_argument e){}; //numberValid = false by default
+    catch (std::invalid_argument& e){}; //numberValid = false by default
 
     if(!spinTypeValid || !levelValid || !numberValid)
     {
@@ -94,6 +94,7 @@ int main(int argc, char* argv[]) {
     p.add("-n", "--number", "Number spins spun (between 1-100)");
     p.add("-r", "--reverse","Sets default direction to clockwise instead of counter-clockwise", ap::mode::BOOLEAN);
     p.add("-c", "--code",   "Prints spin as code rather than human readable", ap::mode::BOOLEAN);
+    p.add("-b", "--normalize",   "Reduces strange and awkward transitions, variations, and features", ap::mode::BOOLEAN);
 
     ap::argmap args = p.parse();
 
@@ -104,7 +105,7 @@ int main(int argc, char* argv[]) {
 
     validateInput(args);
 
-    SpinSpinner spinSpinnerObj = SpinSpinner(std::stoi(args["--reverse"]));
+    SpinSpinner spinSpinnerObj = SpinSpinner(std::stoi(args["--reverse"]),std::stoi(args["--normalize"]));
     int spinLevel = std::stoi(args["--level"]); //if empty it will be set to 0 by validateInput()
     std::string spinType = args["--type"];
     int numberOfSpins = std::stoi(args["--number"]);
