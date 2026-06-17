@@ -555,6 +555,12 @@ bool SpinSpinner::addIntermediatePosition()
 }
 bool SpinSpinner::addChangeOfDirection()
 {
+    //check for difficult variation included in upright spin (needed for change of direction feature to count)
+    if(currentSpin.baseType=='u')
+    {
+        if(currentSpin.spinSegments.at(0).getVariationCount()==0)
+            return false;
+    }
     if(currentSpin.changeDirectionFlag)
         return false;
     if(easyRandom::range(0,1))
@@ -593,8 +599,8 @@ SpinPosition* SpinSpinner::pickNonConflictingPosition()
     }
     else //is change foot spin (need to check for only 2 bullets on each foot)
     {
-        int bulletsOnFirstSegment = currentSpin.spinSegments.at(0).getBullets();
-        int bulletsOnSecondSegment = currentSpin.spinSegments.at(1).getBullets();
+        int bulletsOnFirstSegment = currentSpin.spinSegments.at(0).getBulletCount();
+        int bulletsOnSecondSegment = currentSpin.spinSegments.at(1).getBulletCount();
 
         if(bulletsOnFirstSegment==2 && bulletsOnSecondSegment<2) //1. 2 bullets on first side
         {

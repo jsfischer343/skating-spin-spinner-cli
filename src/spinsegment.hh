@@ -32,7 +32,8 @@ class SpinSegment
         void swapFootness();
 
         std::vector<char> getUsedPositions() const;
-        int getBullets() const; //Difficult variations + features + other. Needed because there is a maximum of 2 bullets per foot in change foot spins.
+        int getBulletCount() const; //Difficult variations + features + other. Needed because there is a maximum of 2 bullets per foot in change foot spins.
+        int getVariationCount() const;
         bool hasDifficultChangeOfPosition() const;
 
         std::string getDirectionString() const;

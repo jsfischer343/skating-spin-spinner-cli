@@ -31,11 +31,11 @@ std::vector<char> SpinSegment::getUsedPositions() const
     }
     return usedPositions;
 }
-int SpinSegment::getBullets() const
+int SpinSegment::getBulletCount() const
 {
     int sumOfBullets = 0;
 
-    //count features and variations on spin positions
+    //count features and variations on all spin positions
     for(size_t i=0;i<spinPositions.size();i++)
     {
         sumOfBullets += spinPositions.at(i).variations.size();
@@ -47,6 +47,18 @@ int SpinSegment::getBullets() const
         sumOfBullets++;
 
     return sumOfBullets;
+}
+int SpinSegment::getVariationCount() const
+{
+    int sumOfVariations = 0;
+
+    //count variations on all spin positions
+    for(size_t i=0;i<spinPositions.size();i++)
+    {
+        sumOfVariations += spinPositions.at(i).variations.size();
+    }
+
+    return sumOfVariations;
 }
 bool SpinSegment::hasDifficultChangeOfPosition() const
 {
