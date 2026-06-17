@@ -252,10 +252,9 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
     else
         currentSegment = &currentSpin.spinSegments.at(1);
 
+    //logic error catch
     if(currentSegment->spinPositions.size()==3 || currentSpin.spinSegments.size()>2) //If this is true then it would imply that we are trying to add a 4th basic position to the same foot OR add a third segment, which wouldn't make sense
-    {
         throw;
-    }
 
     char nextPosition;
     if(targetLevel>=1) //combo spins level 1 or higher can have a difficult change of position so the logic is more lax (i.e. there are more posibilities)
@@ -280,15 +279,23 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
 
         nextPosition = easyRandom::pickFromVectorWeighted(unusedPositions,positionWeightsForUnusedPositions);
 
+        if(nextPosition=='u')
+        {
+            if(easyRandom::weightedTruth(COMBO_SWAP_UPRIGHT_FOR_LAYBACK))
+            {
+                nextPosition='l';
+            }
+        }
+
         //check and update difficult change of position flag
         if(!currentSegment->spinPositions.empty())
         {
             char previousPosition = currentSegment->spinPositions.at(currentSegment->spinPositions.size()-1).position;
-            if((previousPosition=='s'||previousPosition=='u')&&nextPosition=='c')
+            if((previousPosition=='s'||previousPosition=='u'||previousPosition=='l')&&nextPosition=='c')
                 currentSegment->features.difficultChangeOfPosition = true;
         }
     }
-    else //there is a small amount of base combos that can be rolled so the logic is a bit simpler. Note: intermediate positions aren't valid for a base spin
+    else //there is a small amount of base combos that can be rolled so the logic is a bit simpler.
     {
         if(currentSpin.spinSegments.size()==2 && currentSegment->spinPositions.size()==0) //Is change of foot spin and this is the first position
         {
@@ -320,6 +327,13 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
                 nextPosition = 's';
             else if(previousPosition=='s')
                 nextPosition = 'u';
+        }
+        if(nextPosition=='u')
+        {
+            if(easyRandom::weightedTruth(COMBO_SWAP_UPRIGHT_FOR_LAYBACK))
+            {
+                nextPosition='l';
+            }
         }
     }
     currentSegment->spinPositions.push_back(SpinPosition(currentSegment,nextPosition));

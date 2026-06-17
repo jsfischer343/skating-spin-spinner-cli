@@ -5,6 +5,7 @@ bool Spin::hasAllPrimaryPositions() const
     bool hasCamel = false;
     bool hasSit = false;
     bool hasUpright = false;
+    bool hasLayback = false;
     for(size_t i=0;i<spinSegments.size();i++)
     {
         for(size_t j=0;j<spinSegments.at(i).spinPositions.size();j++)
@@ -15,9 +16,11 @@ bool Spin::hasAllPrimaryPositions() const
                 hasSit = true;
             else if(spinSegments.at(i).spinPositions.at(j).position=='u')
                 hasUpright = true;
+            else if(spinSegments.at(i).spinPositions.at(j).position=='l')
+                hasLayback = true;
         }
     }
-    if(hasCamel && hasSit && hasUpright)
+    if(hasCamel && hasSit && (hasUpright||hasLayback))
         return true;
     return false;
 }

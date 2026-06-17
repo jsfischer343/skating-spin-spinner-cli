@@ -18,6 +18,7 @@
 #define COMBO_START_CAMEL_PROB 0.6
 #define COMBO_START_SIT_PROB 0.36
 #define COMBO_START_UPRIGHT_PROB 0.04
+#define COMBO_SWAP_UPRIGHT_FOR_LAYBACK 0.15
 
 //Probablities for spin bullets
 #define ADD_VARIATION_PROB 0.32
