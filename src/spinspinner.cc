@@ -34,7 +34,6 @@ void SpinSpinner::spin()
     }
 
     setRandomBaseQualities(); //sets fly and change foot properties
-    initializeBaseStructure();
     generateSpin();
 }
 void SpinSpinner::spin(int level)
@@ -65,7 +64,6 @@ void SpinSpinner::spin(int level)
     }
 
     setRandomBaseQualities(); //sets fly and change foot properties
-    initializeBaseStructure();
     generateSpin();
 }
 void SpinSpinner::spin(char type, int level)
@@ -76,7 +74,6 @@ void SpinSpinner::spin(char type, int level)
     currentSpin.baseType = type;
 
     setRandomBaseQualities(); //sets fly and change foot properties
-    initializeBaseStructure();
     generateSpin();
 }
 void SpinSpinner::generateSpin()
@@ -97,6 +94,42 @@ void SpinSpinner::generateSpin()
 }
 void SpinSpinner::generateSpinInOnePosition()
 {
+    //decide footness
+    char startingFootness;
+    char otherFootness;
+    if(currentSpin.isFlying && currentSpin.baseType=='c' && normalize) //flying forward camel is decided to be not a normal spin (i.e. if normalize is active then always start with a back-spin)
+    {
+        startingFootness = 'b';
+        otherFootness = 'f';
+    }
+    else
+    {
+        if(easyRandom::range(0,1))
+        {
+            startingFootness = 'f';
+            otherFootness = 'b';
+        }
+        else
+        {
+            startingFootness = 'b';
+            otherFootness = 'f';
+        }
+    }
+    //initialize spin segments
+    if(currentSpin.isChangeFoot)
+    {
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,otherFootness));
+    }
+    else
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
+    //add default spin positions
+    for(size_t i=0;i<currentSpin.spinSegments.size();i++)
+    {
+        SpinSegment* currentSegment = &currentSpin.spinSegments.at(i);
+        currentSegment->spinPositions.push_back(SpinPosition(currentSegment,currentSpin.baseType));
+    }
+
     //add levels
     for(int i=0;i<targetLevel;i++)
     {
@@ -115,7 +148,37 @@ void SpinSpinner::generateCombo()
     else
         randomStartPosition = easyRandom::pickFromVectorWeighted(std::vector<int>{'c','s','u'},std::vector<double>{COMBO_START_CAMEL_PROB,COMBO_START_SIT_PROB,COMBO_START_UPRIGHT_PROB});
 
-    //push first segment and position
+    //decide footness
+    char startingFootness;
+    char otherFootness;
+    if(currentSpin.isFlying && randomStartPosition =='c' && normalize) //flying forward camel is decided to be not a normal spin (i.e. if normalize is active then always start with a back-spin)
+    {
+        startingFootness = 'b';
+        otherFootness = 'f';
+    }
+    else
+    {
+        if(easyRandom::range(0,1))
+        {
+            startingFootness = 'f';
+            otherFootness = 'b';
+        }
+        else
+        {
+            startingFootness = 'b';
+            otherFootness = 'f';
+        }
+    }
+    //initialize spin segments
+    if(currentSpin.isChangeFoot)
+    {
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,otherFootness));
+    }
+    else
+        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
+
+    //push first position
     currentSpin.spinSegments.at(0).spinPositions.push_back(SpinPosition(&currentSpin.spinSegments.at(0),randomStartPosition));
 
     //Logic to add the rest of the positions
@@ -123,7 +186,7 @@ void SpinSpinner::generateCombo()
 
     //check for difficult change of position
     bool hasDifficultChangeOfPosition = false;
-    if(targetLevel>=1 && currentSpin.hasDifficultChangeOfPosition())
+    if(currentSpin.hasDifficultChangeOfPosition())
     {
         currentSpin.level++;
         hasDifficultChangeOfPosition = true;
@@ -303,39 +366,6 @@ void SpinSpinner::setRandomBaseQualities()
 
 
 
-}
-void SpinSpinner::initializeBaseStructure()
-{
-    char startingFootness;
-    char otherFootness;
-
-    if(easyRandom::range(0,1))
-    {
-        startingFootness = 'f';
-        otherFootness = 'b';
-    }
-    else
-    {
-        startingFootness = 'b';
-        otherFootness = 'f';
-    }
-
-    if(currentSpin.isChangeFoot)
-    {
-        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
-        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,otherFootness));
-    }
-    else
-        currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
-
-    if(currentSpin.baseType!='k')
-    {
-        for(size_t i=0;i<currentSpin.spinSegments.size();i++)
-        {
-            SpinSegment* currentSegment = &currentSpin.spinSegments.at(i);
-            currentSegment->spinPositions.push_back(SpinPosition(currentSegment,currentSpin.baseType));
-        }
-    }
 }
 void SpinSpinner::addLevel()
 {

@@ -48,11 +48,11 @@ class SpinSpinner
 
         SpinSpinner(bool defaultDirection, bool normalize);
 
-        void spin(); //as in the act of spinning a wheel
+        void spin(); //clarification: as in the act of spinning a wheel
         void spin(int level);
         void spin(char spinType, int level);
     private:
-        int targetLevel = 0; //the target level for the currentSpin being generated
+        int targetLevel = 0; //generateSpin will keep adding levels until it reaches this target
         Spin currentSpin;
         void generateSpin();
             void generateSpinInOnePosition();
@@ -61,7 +61,6 @@ class SpinSpinner
                     void generateComboPositions_addPosition(bool swappedFeet);
 
         void setRandomBaseQualities(); //selects base qualities for the spin (think spin code)
-        void initializeBaseStructure(); //adds spin segements and starting positions for some spins
         //main logic for adding levels
         void addLevel();
             bool addVariation();
