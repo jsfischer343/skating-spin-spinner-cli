@@ -1,6 +1,6 @@
 //Author: Federico Menozzi
 //Source: https://github.com/fmenozzi/argparser
-//Commit: edf4c4ee0b22c2ead95e43ede287ed6363e0d036
+//Fork of: edf4c4ee0b22c2ead95e43ede287ed6363e0d036
 
 #pragma once
 
@@ -245,7 +245,7 @@ namespace ap {
 
             // No duplicate short/long args
             auto has_duplicate_args = [&](const argstruct& as) {
-                return as.shortarg == shortarg || as.longarg == longarg;
+                return (as.shortarg == shortarg && as.shortarg!="") || (as.longarg == longarg && as.longarg!="");
             };
             if (std::count_if(m_args.begin(), m_args.end(), has_duplicate_args) > 0) {
                 m_any_adds_failed = true;
