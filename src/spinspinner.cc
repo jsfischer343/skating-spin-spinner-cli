@@ -1,10 +1,11 @@
 #include "spinspinner.hh"
 #include "easyrandom.hh"
 
-SpinSpinner::SpinSpinner(bool defaultDirection, bool normalize)
+SpinSpinner::SpinSpinner(bool defaultDirection, bool normalize, AdultRuleFlags adultRuleFlags)
 {
     this->defaultDirection = defaultDirection;
     this->normalize = normalize;
+    this->adultRuleFlags = adultRuleFlags;
 }
 void SpinSpinner::spin()
 {
@@ -97,7 +98,7 @@ void SpinSpinner::generateSpinInOnePosition()
     //decide footness
     char startingFootness;
     char otherFootness;
-    if(currentSpin.isFlying && currentSpin.baseType=='c' && normalize) //flying forward camel is decided to be not a normal spin (i.e. if normalize is active then always start with a back-spin)
+    if(currentSpin.isFlying && currentSpin.baseType=='c' && normalize) //flying forward camel is not a "normal" spin (i.e. if normalize is active then always start with a back-spin)
     {
         startingFootness = 'b';
         otherFootness = 'f';
@@ -641,23 +642,29 @@ void SpinSpinner::addARequiredBulletForLevel4()
     {
         int randomSelect = easyRandom::pickFromVector(std::vector<int>{0,1,2,3,4});
 
-        if(randomSelect==0)
+        if(randomSelect==0) //difficult exit
         {
             if(currentSpin.features.difficultEntrance && !currentSpin.isFlying)
                 continue;
             currentSpin.features.difficultExit = true;
             break;
         }
-        else if(randomSelect==1)
+        else if(randomSelect==1) //change of edge
         {
             SpinPosition* randomPosition = pickNonConflictingPosition();
             if(!checkFeatureValidity(randomPosition,'c'))
                 continue;
-            randomPosition->features.push_back('c');
-            break;
+            if(randomPosition->addFeature('c',normalize))
+                break;
         }
-        else if(randomSelect==2)
+        else if(randomSelect==2) //change of direction
         {
+            //check for difficult variation included in upright spin (needed for change of direction feature to count)
+            if(currentSpin.baseType=='u')
+            {
+                if(currentSpin.spinSegments.at(0).getVariationCount()==0)
+                    continue;
+            }
             if(currentSpin.spinSegments.size()<2)
                 continue;
             else
@@ -672,15 +679,15 @@ void SpinSpinner::addARequiredBulletForLevel4()
                 break;
             }
         }
-        else if(randomSelect==3)
+        else if(randomSelect==3) //clear increase of speed
         {
             SpinPosition* randomPosition = pickNonConflictingPosition();
             if(!checkFeatureValidity(randomPosition,'s'))
                 continue;
-            randomPosition->features.push_back('s');
-            break;
+            if(randomPosition->addFeature('s',normalize))
+                break;
         }
-        else if(randomSelect==4)
+        else if(randomSelect==4) //difficult variation of flying entry
         {
             if(!currentSpin.isFlying)
                 continue;

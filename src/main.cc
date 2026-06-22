@@ -13,7 +13,6 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *
-* Version: 1.0
 */
 
 #include <iostream>
@@ -26,6 +25,16 @@
 
 void validateInput(ap::argmap& args)
 {
+    //exclusive argument for adult rules
+    if(std::stoi(args["--adult-senior-junior"])+
+        std::stoi(args["--adult-novice-intermediate"])+
+        std::stoi(args["--adult-gold"])+
+        std::stoi(args["--adult-silver"])+
+        std::stoi(args["--adult-bronze"]) > 1)
+    {
+        std::cout << "Can only use one set of adult rules. Use -h flag for more information.\n";
+        exit(1);
+    }
     //spin type
     bool spinTypeValid = false;
     std::vector<std::string> validSpinTypes = {"any","camel","sit","upright","layback","combo"};
@@ -86,15 +95,30 @@ void validateInput(ap::argmap& args)
     return;
 }
 
+AdultRuleFlags setupAdultRuleFlags(ap::argmap& args)
+{
+    AdultRuleFlags adultRuleFlags = AdultRuleFlags();
+    adultRuleFlags.senior_junior = std::stoi(args["--adult-senior-junior"]);
+    adultRuleFlags.novice_intermediate = std::stoi(args["--adult-novice-intermediate"]);
+    adultRuleFlags.gold = std::stoi(args["--adult-gold"]);
+    adultRuleFlags.silver = std::stoi(args["--adult-silver"]);
+    adultRuleFlags.bronze = std::stoi(args["--adult-bronze"]);
+    return adultRuleFlags;
+}
 int main(int argc, char* argv[]) {
 
     ap::parser p(argc, argv);
-    p.add("-l", "--level",  "Spin level (numeric 0-4)");
-    p.add("-t", "--type",   "Type of spin (any, camel, sit, upright, layback, combo)");
-    p.add("-n", "--number", "Number spins spun (between 1-100)");
-    p.add("-r", "--reverse","Sets default direction to clockwise instead of counter-clockwise", ap::mode::BOOLEAN);
-    p.add("-c", "--code",   "Prints spin as code rather than human readable", ap::mode::BOOLEAN);
-    p.add("-b", "--normalize",   "Reduces strange and awkward transitions, variations, and features", ap::mode::BOOLEAN);
+    p.add("-l", "--level",                      "Spin level (numeric 0-4)");
+    p.add("-t", "--type",                       "Type of spin (any, camel, sit, upright, layback, combo)");
+    p.add("-n", "--number",                     "Number spins spun (between 1-100)");
+    p.add("-r", "--reverse",                    "Sets default direction to clockwise instead of counter-clockwise",                             ap::mode::BOOLEAN);
+    p.add("-c", "--code",                       "Prints spin as code rather than human readable",                                               ap::mode::BOOLEAN);
+    p.add("-b", "--normalize",                  "Reduces strange and awkward transitions, variations, and features",                            ap::mode::BOOLEAN);
+    p.add("",   "--adult-senior-junior",        "Modifies the spin logic so spin are in accordance with the adult senior-junior rules.",        ap::mode::BOOLEAN);
+    p.add("",   "--adult-novice-intermediate",  "Modifies the spin logic so spin are in accordance with the adult novice-intermediate rules.",  ap::mode::BOOLEAN);
+    p.add("",   "--adult-gold",                 "Modifies the spin logic so spin are in accordance with the adult gold rules.",                 ap::mode::BOOLEAN);
+    p.add("",   "--adult-silver",               "Modifies the spin logic so spin are in accordance with the adult silver rules.",               ap::mode::BOOLEAN);
+    p.add("",   "--adult-bronze",               "Modifies the spin logic so spin are in accordance with the adult bronze rules.",               ap::mode::BOOLEAN);
 
     ap::argmap args = p.parse();
 
@@ -105,7 +129,7 @@ int main(int argc, char* argv[]) {
 
     validateInput(args);
 
-    SpinSpinner spinSpinnerObj = SpinSpinner(std::stoi(args["--reverse"]),std::stoi(args["--normalize"]));
+    SpinSpinner spinSpinnerObj = SpinSpinner(std::stoi(args["--reverse"]),std::stoi(args["--normalize"]),setupAdultRuleFlags(args));
     int spinLevel = std::stoi(args["--level"]); //if empty it will be set to 0 by validateInput()
     std::string spinType = args["--type"];
     int numberOfSpins = std::stoi(args["--number"]);

@@ -40,14 +40,24 @@
 #include "spin.hh"
 #include "easyrandom.hh"
 
+typedef struct AdultRuleFlags
+{
+    bool senior_junior = false;
+    bool novice_intermediate = false;
+    bool gold = false;
+    bool silver = false;
+    bool bronze = false;
+} AdultRuleFlags;
+
 class SpinSpinner
 {
     public:
         bool defaultDirection = false; //false: counter-clockwise, true: clockwise
         bool normalize = true;
+        AdultRuleFlags adultRuleFlags;
         std::vector<Spin> spinHistory = {}; //every time one of the spin functions is called it will push to this list
 
-        SpinSpinner(bool defaultDirection, bool normalize);
+        SpinSpinner(bool defaultDirection, bool normalize, AdultRuleFlags adultRuleFlags);
 
         void spin(); //clarification: as in the act of spinning a wheel
         void spin(int level);
