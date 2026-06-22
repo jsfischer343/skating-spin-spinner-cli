@@ -593,44 +593,49 @@ int SpinSpinner::pickRandomBulletType()
 }
 SpinPosition* SpinSpinner::pickNonConflictingPosition()
 {
-    if(!currentSpin.isChangeFoot) //not change foot spin
+    SpinPosition* nonConflictingPosition = nullptr;
+    do
     {
-        int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(0).spinPositions.size()-1);
-        return &currentSpin.spinSegments.at(0).spinPositions.at(randomIndex);
-    }
-    else //is change foot spin (need to check for only 2 bullets on each foot)
-    {
-        int bulletsOnFirstSegment = currentSpin.spinSegments.at(0).getBulletCount();
-        int bulletsOnSecondSegment = currentSpin.spinSegments.at(1).getBulletCount();
-
-        if(bulletsOnFirstSegment==2 && bulletsOnSecondSegment<2) //1. 2 bullets on first side
-        {
-            int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(1).spinPositions.size()-1);
-            return &currentSpin.spinSegments.at(1).spinPositions.at(randomIndex);
-        }
-        else if(bulletsOnFirstSegment<2 && bulletsOnSecondSegment==2) //2. 2 bullets on second side
+        if(!currentSpin.isChangeFoot) //not change foot spin
         {
             int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(0).spinPositions.size()-1);
-            return &currentSpin.spinSegments.at(0).spinPositions.at(randomIndex);
+            nonConflictingPosition = &currentSpin.spinSegments.at(0).spinPositions.at(randomIndex);
         }
-        else if(bulletsOnFirstSegment<2 && bulletsOnSecondSegment<2) //3. less than 2 bullets on both sides
+        else //is change foot spin (need to check for only 2 bullets on each foot)
         {
-            int randomSegmentIndex = easyRandom::range(0,1);
-            int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.size()-1);
-            return &currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.at(randomIndex);
+            int bulletsOnFirstSegment = currentSpin.spinSegments.at(0).getBulletCount();
+            int bulletsOnSecondSegment = currentSpin.spinSegments.at(1).getBulletCount();
+
+            if(bulletsOnFirstSegment==2 && bulletsOnSecondSegment<2) //1. 2 bullets on first side
+            {
+                int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(1).spinPositions.size()-1);
+                nonConflictingPosition = &currentSpin.spinSegments.at(1).spinPositions.at(randomIndex);
+            }
+            else if(bulletsOnFirstSegment<2 && bulletsOnSecondSegment==2) //2. 2 bullets on second side
+            {
+                int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(0).spinPositions.size()-1);
+                nonConflictingPosition = &currentSpin.spinSegments.at(0).spinPositions.at(randomIndex);
+            }
+            else if(bulletsOnFirstSegment<2 && bulletsOnSecondSegment<2) //3. less than 2 bullets on both sides
+            {
+                int randomSegmentIndex = easyRandom::range(0,1);
+                int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.size()-1);
+                nonConflictingPosition = &currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.at(randomIndex);
+            }
+            else
+                throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total in change foot spins
         }
-        else
-            throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total in change foot spins
-    }
+    } while(nonConflictingPosition->position=='i'); //this while loop ensures that intermediate positions aren't selected for any features (better implementation probably exists)
+    return nonConflictingPosition;
 }
 bool SpinSpinner::missingBulletForLevel4()
 {
-    if(currentSpin.hasDifficultChangeOfPosition()||         //1. difficult change of position
-        currentSpin.features.difficultExit||                //2. difficult exit
-        currentSpin.featureUsed('c')||                      //3. change of edge
-        currentSpin.changeDirectionFlag||                   //4. opposite directions immediately following each other
-        currentSpin.featureUsed('s')||                      //5. clear increase in speed
-        (currentSpin.isFlying && currentSpin.features.difficultEntrance)) //6. difficult variation of flying entry
+    if(currentSpin.features.difficultExit||                 //1. difficult exit
+        currentSpin.featureUsed('c')||                      //2. change of edge
+        currentSpin.changeDirectionFlag||                   //3. opposite directions immediately following each other
+        currentSpin.featureUsed('s')||                      //4. clear increase in speed
+        (currentSpin.isFlying && currentSpin.features.difficultEntrance)|| //5. difficult variation of flying entry
+        currentSpin.featureUsed('w'))                       //6. windmill
     {
         return false;
     }
@@ -642,14 +647,7 @@ void SpinSpinner::addARequiredBulletForLevel4()
     {
         int randomSelect = easyRandom::pickFromVector(std::vector<int>{0,1,2,3,4});
 
-        if(randomSelect==0) //difficult exit
-        {
-            if(currentSpin.features.difficultEntrance && !currentSpin.isFlying)
-                continue;
-            currentSpin.features.difficultExit = true;
-            break;
-        }
-        else if(randomSelect==1) //change of edge
+        if(randomSelect==0) //change of edge
         {
             SpinPosition* randomPosition = pickNonConflictingPosition();
             if(!checkFeatureValidity(randomPosition,'c'))
@@ -657,7 +655,7 @@ void SpinSpinner::addARequiredBulletForLevel4()
             if(randomPosition->addFeature('c',normalize))
                 break;
         }
-        else if(randomSelect==2) //change of direction
+        else if(randomSelect==1) //change of direction
         {
             //check for difficult variation included in upright spin (needed for change of direction feature to count)
             if(currentSpin.baseType=='u')
@@ -679,7 +677,7 @@ void SpinSpinner::addARequiredBulletForLevel4()
                 break;
             }
         }
-        else if(randomSelect==3) //clear increase of speed
+        else if(randomSelect==2) //clear increase of speed
         {
             SpinPosition* randomPosition = pickNonConflictingPosition();
             if(!checkFeatureValidity(randomPosition,'s'))
@@ -687,12 +685,20 @@ void SpinSpinner::addARequiredBulletForLevel4()
             if(randomPosition->addFeature('s',normalize))
                 break;
         }
-        else if(randomSelect==4) //difficult variation of flying entry
+        else if(randomSelect==3) //difficult variation of flying entry
         {
             if(!currentSpin.isFlying)
                 continue;
             currentSpin.features.difficultEntrance = true;
             break;
+        }
+        else if(randomSelect==4) //windmill
+        {
+            SpinPosition* randomPosition = pickNonConflictingPosition();
+            if(!checkFeatureValidity(randomPosition,'w'))
+                continue;
+            if(randomPosition->addFeature('w',normalize))
+                break;
         }
     }
 }
@@ -729,15 +735,25 @@ bool SpinSpinner::shouldAvoidChangeFootByJump()
 {
     if(!currentSpin.isChangeFoot) //safeguard
         return true;
-    else if(normalize)
+    else
     {
         SpinSegment* firstSegment = &currentSpin.spinSegments.at(0);
         SpinSegment* secondSegment = &currentSpin.spinSegments.at(1);
         char lastPositionOnFirstSegment = firstSegment->spinPositions.at(firstSegment->spinPositions.size()-1).position;
-        if(firstSegment->direction!=secondSegment->direction) //no change of foot by jump if changing rotational direction
+        char firstPositionOnSecondSegment = secondSegment->spinPositions.at(0).position;
+
+        if(firstPositionOnSecondSegment!='c' && firstPositionOnSecondSegment!='s') //according to updated rules change of foot by jump must go into camel or sit position
             return true;
-        if((lastPositionOnFirstSegment!='s'||lastPositionOnFirstSegment!='u') && currentSpin.spinSegments.at(0).footness=='b') //no change of foot by jump from backspin to forward spin (unless sit or upright?)
-            return true;
+
+        if(normalize)
+        {
+            if(lastPositionOnFirstSegment!='c' && firstPositionOnSecondSegment=='c') //jumping from any other position onto a camel is probably awkward
+                return true;
+            if(firstSegment->direction!=secondSegment->direction) //no change of foot by jump if changing rotational direction
+                return true;
+            if(lastPositionOnFirstSegment!='s' && firstSegment->footness=='b') //no change of foot by jump from backspin to forward spin unless sit spin
+                return true;
+        }
     }
     return false;
 }
