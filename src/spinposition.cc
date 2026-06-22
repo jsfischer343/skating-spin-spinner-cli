@@ -36,7 +36,7 @@ bool SpinPosition::addVariation(char variation, bool normalize)
                 variations.insert(variations.begin()+i,variation);
                 return true;
             }
-            if((variations.at(i)=='s' && variation=='t')||variations.at(i)=='t' && variation=='s') //don't combine side and straight (only applies to upright)
+            if((variations.at(i)=='s' && variation=='t')||(variations.at(i)=='t' && variation=='s')) //don't combine side and straight (only applies to upright)
                 return false;
         }
         variations.push_back(variation);

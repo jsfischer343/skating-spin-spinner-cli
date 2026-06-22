@@ -264,6 +264,7 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
         std::vector<char> usedPositions = currentSegment->getUsedPositions();
         std::vector<char> unusedPositions;
 
+        std::replace(usedPositions.begin(), usedPositions.end(), 'l', 'u'); //if layback is substitute for upright so for the logic to work any layback positions must be treated as uprights
         std::sort(usedPositions.begin(),usedPositions.end());
         std::set_difference(validPositions.begin(),validPositions.end(),usedPositions.begin(),usedPositions.end(),std::back_inserter(unusedPositions));
 
@@ -312,7 +313,7 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
                 else if(previousPosition=='u')
                     nextPosition = 'u';
             }
-            else //
+            else
             {
                 if(previousPosition=='c')
                     nextPosition = 's';
@@ -407,8 +408,6 @@ void SpinSpinner::addLevel()
         {
             addChangeOfDirection();
         }
-        currentSpin.level++;
-        return;
     }
     else //need to check for conflicts with features already in the spin
     {
@@ -460,8 +459,8 @@ void SpinSpinner::addLevel()
                     throw; //implies that randomSelect is outside of possible spin additions (this would be a bug)
             }
         }
-        currentSpin.level++;
     }
+    currentSpin.level++;
 }
 bool SpinSpinner::addVariation()
 {
@@ -474,9 +473,9 @@ bool SpinSpinner::addVariation()
     }
     else //check for rule conflicts
     {
-        if(currentSpin.twoVariationsFlag)
-            return false;
         if(!easyRandom::weightedTruth(VARIATION_ON_SAME_POSITION_PROB) && !randomPosition->variations.empty()) //reduce the chance of stacking variations on the same position
+            return false;
+        if(currentSpin.twoVariationsFlag)
             return false;
         else
         {
@@ -606,6 +605,10 @@ SpinPosition* SpinSpinner::pickNonConflictingPosition()
             int bulletsOnFirstSegment = currentSpin.spinSegments.at(0).getBulletCount();
             int bulletsOnSecondSegment = currentSpin.spinSegments.at(1).getBulletCount();
 
+            //special exception: if by accident a difficult change of position occurs on both segments then only count first one
+            if(currentSpin.spinSegments.at(0).features.difficultChangeOfPosition && currentSpin.spinSegments.at(1).features.difficultChangeOfPosition)
+                bulletsOnSecondSegment--;
+
             if(bulletsOnFirstSegment==2 && bulletsOnSecondSegment<2) //1. 2 bullets on first side
             {
                 int randomIndex = easyRandom::range(0,currentSpin.spinSegments.at(1).spinPositions.size()-1);
@@ -623,7 +626,9 @@ SpinPosition* SpinSpinner::pickNonConflictingPosition()
                 nonConflictingPosition = &currentSpin.spinSegments.at(randomSegmentIndex).spinPositions.at(randomIndex);
             }
             else
+            {
                 throw; //when adding levels properly there should never be more than 2 bullets on each foot and 4 bullets total in change foot spins
+            }
         }
     } while(nonConflictingPosition->position=='i'); //this while loop ensures that intermediate positions aren't selected for any features (better implementation probably exists)
     return nonConflictingPosition;
@@ -645,9 +650,16 @@ void SpinSpinner::addARequiredBulletForLevel4()
 {
     while(true) //keep looping until the rolled spin "bullet" (variation/features) doesn't conflict with any other additions (lazy implementation)
     {
-        int randomSelect = easyRandom::pickFromVector(std::vector<int>{0,1,2,3,4});
+        int randomSelect = easyRandom::pickFromVector(std::vector<int>{0,1,2,3,4,5});
 
-        if(randomSelect==0) //change of edge
+        if(randomSelect==0) //difficult exit
+        {
+            if(!currentSpin.features.difficultEntrance)
+                continue;
+            currentSpin.features.difficultExit = true;
+            break;
+        }
+        else if(randomSelect==1) //change of edge
         {
             SpinPosition* randomPosition = pickNonConflictingPosition();
             if(!checkFeatureValidity(randomPosition,'c'))
@@ -655,7 +667,7 @@ void SpinSpinner::addARequiredBulletForLevel4()
             if(randomPosition->addFeature('c',normalize))
                 break;
         }
-        else if(randomSelect==1) //change of direction
+        else if(randomSelect==2) //change of direction
         {
             //check for difficult variation included in upright spin (needed for change of direction feature to count)
             if(currentSpin.baseType=='u')
@@ -677,7 +689,7 @@ void SpinSpinner::addARequiredBulletForLevel4()
                 break;
             }
         }
-        else if(randomSelect==2) //clear increase of speed
+        else if(randomSelect==3) //clear increase of speed
         {
             SpinPosition* randomPosition = pickNonConflictingPosition();
             if(!checkFeatureValidity(randomPosition,'s'))
@@ -685,14 +697,14 @@ void SpinSpinner::addARequiredBulletForLevel4()
             if(randomPosition->addFeature('s',normalize))
                 break;
         }
-        else if(randomSelect==3) //difficult variation of flying entry
+        else if(randomSelect==4) //difficult variation of flying entry
         {
             if(!currentSpin.isFlying)
                 continue;
             currentSpin.features.difficultEntrance = true;
             break;
         }
-        else if(randomSelect==4) //windmill
+        else if(randomSelect==5) //windmill
         {
             SpinPosition* randomPosition = pickNonConflictingPosition();
             if(!checkFeatureValidity(randomPosition,'w'))

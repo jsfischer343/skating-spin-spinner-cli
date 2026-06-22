@@ -81,7 +81,7 @@ void validateInput(ap::argmap& args)
         else
         {
            int tempCheck = std::stoi(args["--number"]);
-           if(tempCheck>0 && tempCheck<=100)
+           if(tempCheck>0 && tempCheck<=1000)
                numberValid = true;
         }
     }
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
     ap::parser p(argc, argv);
     p.add("-l", "--level",                      "Spin level (numeric 0-4)");
     p.add("-t", "--type",                       "Type of spin (any, camel, sit, upright, layback, combo)");
-    p.add("-n", "--number",                     "Number spins spun (between 1-100)");
+    p.add("-n", "--number",                     "Number spins spun (between 1-1000)");
     p.add("-r", "--reverse",                    "Sets default direction to clockwise instead of counter-clockwise",                             ap::mode::BOOLEAN);
     p.add("-c", "--code",                       "Prints spin as code rather than human readable",                                               ap::mode::BOOLEAN);
     p.add("-b", "--normalize",                  "Reduces strange and awkward transitions, variations, and features",                            ap::mode::BOOLEAN);

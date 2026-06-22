@@ -66,7 +66,7 @@ bool SpinSegment::hasDifficultChangeOfPosition() const
     {
         char previousPosition = this->spinPositions.at(i-1).position;
         char currentPosition = this->spinPositions.at(i).position;
-        if(previousPosition=='s'||previousPosition=='u')
+        if(previousPosition=='s'||previousPosition=='u'||previousPosition=='l')
         {
             if(currentPosition=='c')
             {
