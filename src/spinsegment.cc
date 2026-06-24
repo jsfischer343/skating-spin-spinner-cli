@@ -45,6 +45,8 @@ int SpinSegment::getBulletCount() const
     //count segement specific features
     if(features.difficultChangeOfPosition)
         sumOfBullets++;
+    if(features.allThreeBasicPositionsOnSecondFoot)
+        sumOfBullets++;
 
     return sumOfBullets;
 }
@@ -74,6 +76,27 @@ bool SpinSegment::hasDifficultChangeOfPosition() const
             }
         }
     }
+    return false;
+}
+bool SpinSegment::hasAllPrimaryPositions() const
+{
+    bool hasCamel = false;
+    bool hasSit = false;
+    bool hasUpright = false;
+    bool hasLayback = false;
+    for(size_t j=0;j<this->spinPositions.size();j++)
+    {
+        if(this->spinPositions.at(j).position=='c')
+            hasCamel = true;
+        else if(this->spinPositions.at(j).position=='s')
+            hasSit = true;
+        else if(this->spinPositions.at(j).position=='u')
+            hasUpright = true;
+        else if(this->spinPositions.at(j).position=='l')
+            hasLayback = true;
+    }
+    if(hasCamel && hasSit && (hasUpright||hasLayback))
+        return true;
     return false;
 }
 std::string SpinSegment::getDirectionString() const

@@ -21,6 +21,8 @@ class SpinSegment
         //segment specific features
         typedef struct SpinSegmentFeatures{
             bool difficultChangeOfPosition = false; //sit or upright to camel spin
+            //adult specific:
+            bool allThreeBasicPositionsOnSecondFoot = false;
         } SpinSegmentFeatures;
         SpinSegmentFeatures features;
 
@@ -35,6 +37,7 @@ class SpinSegment
         int getBulletCount() const; //Difficult variations + features + other. Needed because there is a maximum of 2 bullets per foot in change foot spins.
         int getVariationCount() const;
         bool hasDifficultChangeOfPosition() const;
+        bool hasAllPrimaryPositions() const;
 
         std::string getDirectionString() const;
         std::string getFootnessString() const;

@@ -103,9 +103,19 @@ bool SpinPosition::hasFeature(char feature) const
     }
     return false;
 }
-char SpinPosition::pickRandomFeature() const
+bool SpinPosition::hasAnyVariation() const
 {
-    std::vector<char> validFeatures = {'b','c','j','8','s'};
+    if(variations.size()>0)
+        return true;
+    return false;
+}
+char SpinPosition::pickRandomFeature(bool isRev5) const
+{
+    std::vector<char> validFeatures;
+    if(isRev5)
+        validFeatures = {'b','c','j','5','s'};
+    else
+        validFeatures = {'b','c','j','8','s'};
     if(position=='c')
         validFeatures.push_back('w');
     std::vector<char> usedFeatures = features;
@@ -258,6 +268,8 @@ std::string SpinPosition::getFeatureString(bool codeFormat) const
                 featureString += "Sp";
             else if(features.at(i)=='w')
                 featureString += "Wi";
+            else if(features.at(i)=='5')
+                featureString += "5";
         }
     }
     else
@@ -276,6 +288,8 @@ std::string SpinPosition::getFeatureString(bool codeFormat) const
                 featureString += "speed";
             else if(features.at(i)=='w')
                 featureString += "windmill";
+            else if(features.at(i)=='5')
+                featureString += "5 revs";
             if(i!=features.size()-1)
                 featureString += ", ";
         }

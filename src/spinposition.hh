@@ -16,6 +16,7 @@ class SpinPosition
          * position: camel -> 'c'; sit -> 's'; upright -> 'u'; layback -> 'l'; intermediate -> 'i'
          * variation: up -> 'u'; front -> 'f'; behind -> 'b'; side -> 's'; biellmann -> 'm'; straight -> 't'
          * features: blade -> 'b'; coe -> 'c'; jump -> 'j'; 8 revs -> '8'; speed -> 's'; windmill -> 'w'
+         * adult specific features: 5 revs -> '5';
          */
         SpinSegment* parent;
         char position = -1; //basic position: camel, sit, upright, layback, intermediate
@@ -30,7 +31,8 @@ class SpinPosition
         bool addFeature(char feature, bool normalize);
         bool hasVariation(char variation) const;
         bool hasFeature(char feature) const;
-        char pickRandomFeature() const;
+        bool hasAnyVariation() const;
+        char pickRandomFeature(bool isRev5) const;
         char pickRandomVariation() const;
 
         std::string toCode() const;

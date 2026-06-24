@@ -42,6 +42,7 @@
 
 typedef struct AdultRuleFlags
 {
+    bool active = false;
     bool junior_senior = false;
     bool intermediate_novice = false;
     bool gold = false;
@@ -67,6 +68,7 @@ class SpinSpinner
         Spin currentSpin;
         void generateSpin();
             void generateSpinInOnePosition();
+            void generate2FtUSp();
             void generateCombo();
                 void generateComboPositions();
                     void generateComboPositions_addPosition(bool swappedFeet);
@@ -84,6 +86,7 @@ class SpinSpinner
             bool missingBulletForLevel4();
             void addARequiredBulletForLevel4();
             bool checkFeatureValidity(SpinPosition* spinPosition, char featureInQuestion);
+            bool checkFeatureValidityAdult(SpinPosition* spinPosition, char featureInQuestion);
             bool shouldAvoidChangeFootByJump();
 
 

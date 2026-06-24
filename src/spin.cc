@@ -91,37 +91,43 @@ std::string Spin::toCode() const
     std::string resultString = "";
     //level
     resultString += "L"+std::to_string(this->level)+":";
-
-    //flying modifier
-    if(this->isFlying)
-        resultString += "F";
-
-    //first segment
-    resultString += this->spinSegments.at(0).toCode();
-
-    if(this->spinSegments.size()>1)
+    if(this->baseType=='2')
     {
-        //transition
-        if(this->features.changeFootByJump)
-            resultString += "-j-";
-        else
-            resultString += "+";
-
-        //second segment
-        resultString += this->spinSegments.at(1).toCode();
-
-        //any remaining segments?
-        for(size_t i=2;i<spinSegments.size();i++)
-        {
-            resultString += this->spinSegments.at(i).toCode();
-        }
+        resultString+="2FtUSp";
     }
+    else
+    {
+        //flying modifier
+        if(this->isFlying)
+            resultString += "F";
 
-    //final modifiers
-    if(this->features.difficultEntrance)
-        resultString += "DE";
-    if(this->features.difficultExit)
-        resultString += "DX";
+        //first segment
+        resultString += this->spinSegments.at(0).toCode();
+
+        if(this->spinSegments.size()>1)
+        {
+            //transition
+            if(this->features.changeFootByJump)
+                resultString += "-j-";
+            else
+                resultString += "+";
+
+            //second segment
+            resultString += this->spinSegments.at(1).toCode();
+
+            //any remaining segments?
+            for(size_t i=2;i<spinSegments.size();i++)
+            {
+                resultString += this->spinSegments.at(i).toCode();
+            }
+        }
+
+        //final modifiers
+        if(this->features.difficultEntrance)
+            resultString += "DE";
+        if(this->features.difficultExit)
+            resultString += "DX";
+    }
 
     return resultString;
 }
@@ -130,41 +136,47 @@ std::string Spin::prettyPrint() const
     std::string resultString = "";
     //level
     resultString += "Level "+std::to_string(this->level)+": ";
-
-    //flying modifier
-    if(this->isFlying)
-        resultString += "flying ";
-
-    //first segment
-    resultString += this->spinSegments.at(0).prettyPrint();
-
-    if(this->spinSegments.size()>1)
+    if(this->baseType=='2')
     {
-        //transition
-        if(this->features.changeFootByJump)
-            resultString += " --jump-- ";
-        else
-            resultString += " + ";
-
-        //second segment
-        resultString += this->spinSegments.at(1).prettyPrint();
-
-        //any remaining segments?
-        for(size_t i=2;i<spinSegments.size();i++)
-        {
-            resultString += this->spinSegments.at(i).prettyPrint();
-        }
+        resultString+="2FtUSp";
     }
-
-    //final modifiers
-    if(this->features.difficultEntrance && this->features.difficultExit)
-        resultString += " with difficult entrance & exit";
     else
     {
-        if(this->features.difficultEntrance)
-            resultString += " with difficult entrance";
-        if(this->features.difficultExit)
-            resultString += " with difficult exit";
+        //flying modifier
+        if(this->isFlying)
+            resultString += "flying ";
+
+        //first segment
+        resultString += this->spinSegments.at(0).prettyPrint();
+
+        if(this->spinSegments.size()>1)
+        {
+            //transition
+            if(this->features.changeFootByJump)
+                resultString += " --jump-- ";
+            else
+                resultString += " + ";
+
+            //second segment
+            resultString += this->spinSegments.at(1).prettyPrint();
+
+            //any remaining segments?
+            for(size_t i=2;i<spinSegments.size();i++)
+            {
+                resultString += this->spinSegments.at(i).prettyPrint();
+            }
+        }
+
+        //final modifiers
+        if(this->features.difficultEntrance && this->features.difficultExit)
+            resultString += " with difficult entrance & exit";
+        else
+        {
+            if(this->features.difficultEntrance)
+                resultString += " with difficult entrance";
+            if(this->features.difficultExit)
+                resultString += " with difficult exit";
+        }
     }
 
     return resultString;

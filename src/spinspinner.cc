@@ -12,7 +12,11 @@ void SpinSpinner::spin()
     targetLevel = easyRandom::range(0,4);
     currentSpin = Spin();
 
-    int spinSelect = easyRandom::range(0,4);
+    int spinSelect;
+    if(adultRuleFlags.bronze)
+        spinSelect = easyRandom::range(0,5);
+    else
+        spinSelect = easyRandom::range(0,4);
     switch(spinSelect)
     {
         case 0:
@@ -29,6 +33,10 @@ void SpinSpinner::spin()
             break;
         case 4:
             currentSpin.baseType = 'k';
+            break;
+        case 5:
+            currentSpin.baseType = '2';
+            targetLevel = 0;
             break;
         default:
             throw;
@@ -42,7 +50,11 @@ void SpinSpinner::spin(int level)
     targetLevel = level;
     currentSpin = Spin();
 
-    int spinSelect = easyRandom::range(0,4);
+    int spinSelect;
+    if(adultRuleFlags.bronze && targetLevel==0)
+        spinSelect = easyRandom::range(0,5);
+    else
+        spinSelect = easyRandom::range(0,4);
     switch(spinSelect)
     {
         case 0:
@@ -59,6 +71,12 @@ void SpinSpinner::spin(int level)
             break;
         case 4:
             currentSpin.baseType = 'k';
+            break;
+        case 5:
+            currentSpin.baseType = '2';
+            targetLevel = 0;
+            generate2FtUSp();
+            return;
             break;
         default:
             throw;
@@ -73,6 +91,12 @@ void SpinSpinner::spin(char type, int level)
     currentSpin = Spin();
 
     currentSpin.baseType = type;
+    if(currentSpin.baseType=='2')
+    {
+        targetLevel = 0;
+        generate2FtUSp();
+        return;
+    }
 
     setRandomBaseQualities(); //sets fly and change foot properties
     generateSpin();
@@ -90,6 +114,8 @@ void SpinSpinner::generateSpin()
     {
         generateCombo();
     }
+    else if(currentSpin.baseType=='2')
+        generate2FtUSp();
     else
         throw;
 }
@@ -137,6 +163,12 @@ void SpinSpinner::generateSpinInOnePosition()
         addLevel();
     }
 
+    //record spin
+    spinHistory.push_back(currentSpin);
+}
+void SpinSpinner::generate2FtUSp()
+{
+    currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,'f')); //used only to differentiate rotational direction
     //record spin
     spinHistory.push_back(currentSpin);
 }
@@ -384,7 +416,10 @@ void SpinSpinner::setRandomBaseQualities()
 }
 void SpinSpinner::addLevel()
 {
-    if(currentSpin.level==0)
+    //adult rules: for bronze "all three basic positions is the only measure for getting level 1 in combo spins"
+    if(adultRuleFlags.bronze && currentSpin.baseType == 'k')
+        currentSpin.features.allThreeBasicPositionsAnywhere = true;
+    else if(currentSpin.level==0)
     {
         int randomSelect = pickRandomBulletType();
         if(randomSelect==0)
@@ -399,18 +434,18 @@ void SpinSpinner::addLevel()
         {
             addPositionFeature();
         }
-        else if(randomSelect==3) //(only for combos)
+        else if(randomSelect==3) //only for combos (safeguarded by pickRandomBulletType())
         {
             addIntermediatePosition();
         }
-        else if(randomSelect==4) //(only for change foot spins)
+        else if(randomSelect==4) //only for change foot spins (safeguarded by pickRandomBulletType())
         {
             addChangeOfDirection();
         }
     }
     else //need to check for conflicts with features already in the spin
     {
-        if(currentSpin.level==3 && missingBulletForLevel4()) //if missing the required bullets for level 4 and the next level is 4 then add from the required level 4 bullets
+        if(currentSpin.level==3 && missingBulletForLevel4() && adultRuleFlags.intermediate_novice==false) //if missing the required bullets for level 4 and the next level is 4 then add from the required level 4 bullets (note: adult levels intermediate-novice doesn't need a required bullet to get level 4)
         {
             addARequiredBulletForLevel4();
         }
@@ -418,7 +453,7 @@ void SpinSpinner::addLevel()
         {
             while(true) //keep looping until the rolled "spin addition" (variation/features) doesn't conflict with any other additions (lazy implementation)
             {
-                int randomSelect = pickRandomBulletType(); //of the categories spin feature, position feature, intermediate position, change of direction
+                int randomSelect = pickRandomBulletType();
                 if(randomSelect==0)
                 {
                     if(addVariation())
@@ -440,14 +475,14 @@ void SpinSpinner::addLevel()
                     else
                         continue;
                 }
-                else if(randomSelect==3) //only occurs in combo spins (see pickRandomAddition sub-function for logic)
+                else if(randomSelect==3) //only for combos
                 {
                     if(addIntermediatePosition())
                         break;
                     else
                         continue;
                 }
-                else if(randomSelect==4) //change of direction (only for change foot spins)
+                else if(randomSelect==4) //only for change foot spins
                 {
                     if(addChangeOfDirection())
                         break;
@@ -474,7 +509,9 @@ bool SpinSpinner::addVariation()
     {
         if(!easyRandom::weightedTruth(VARIATION_ON_SAME_POSITION_PROB) && !randomPosition->variations.empty()) //reduce the chance of stacking variations on the same position
             return false;
-        if(currentSpin.twoVariationsFlag)
+        if(currentSpin.twoVariationsFlag &&
+            adultRuleFlags.intermediate_novice==false &&
+            adultRuleFlags.gold==false) //adult note: if intermediate-novice or gold then the two variation max is lifted
             return false;
         else
         {
@@ -500,37 +537,78 @@ bool SpinSpinner::addSpinFeature()
     int tempUpperRandomRange = 2;
     if(currentSpin.isChangeFoot)
         tempLowerRandomRange--;
-    if(currentSpin.baseType=='l')
-        tempUpperRandomRange = 3;
+    if(adultRuleFlags.active)
+    {
+        tempUpperRandomRange++;
+    }
+
 
     randomSelect = easyRandom::range(tempLowerRandomRange,tempUpperRandomRange);
-    if(randomSelect==0 && !currentSpin.features.changeFootByJump) //changeFootByJump
+    if(randomSelect==0) //changeFootByJump
     {
-        if(shouldAvoidChangeFootByJump()) //avoid change foot by jump if there is change of direction or awkward positions
+        if(currentSpin.features.changeFootByJump || shouldAvoidChangeFootByJump())
             return false;
         currentSpin.features.changeFootByJump = true;
         return true;
     }
-    else if(randomSelect==1 &&
-    (!currentSpin.features.difficultExit || currentSpin.isFlying) &&
-    !currentSpin.features.difficultEntrance) //difficultEntrance
+    else if(randomSelect==1) //difficultEntrance
     {
-        currentSpin.features.difficultEntrance = true;
-        return true;
+        if((!currentSpin.features.difficultExit || currentSpin.isFlying) &&
+            !currentSpin.features.difficultEntrance)
+        {
+            currentSpin.features.difficultEntrance = true;
+            return true;
+        }
     }
-    else if(randomSelect==2 &&
-    !currentSpin.features.difficultExit &&
-    (!currentSpin.features.difficultEntrance || currentSpin.isFlying)) //difficultExit
+    else if(randomSelect==2) //difficultExit
     {
-        currentSpin.features.difficultExit = true;
-        return true;
+        if(!currentSpin.features.difficultExit &&
+            (!currentSpin.features.difficultEntrance || currentSpin.isFlying))
+        {
+            currentSpin.features.difficultExit = true;
+            return true;
+        }
+    }
+
+    //adult rules: logic for additional spin features for adults below
+    else if(randomSelect==3)
+    {
+        if((currentSpin.baseType=='c'||currentSpin.baseType=='s') && currentSpin.isChangeFoot) //(F)CCSp or (F)CSSp only
+        {
+            if(currentSpin.features.cleanChangeFootSpin)
+                return false;
+            currentSpin.features.cleanChangeFootSpin = true;
+            return true;
+        }
+        if(adultRuleFlags.gold || adultRuleFlags.silver || adultRuleFlags.bronze)
+        {
+            if(currentSpin.hasAllPrimaryPositions() && !currentSpin.features.allThreeBasicPositionsAnywhere)
+            {
+                currentSpin.features.allThreeBasicPositionsAnywhere = true;
+                return true;
+            }
+        }
+        else if(currentSpin.baseType=='k' && currentSpin.isChangeFoot) //TODO: maybe integrate this into spin structure building logic so that if three basic positions on the second foot occurs naturally then it will add a level automatically
+        {
+            if(currentSpin.spinSegments.at(1).hasAllPrimaryPositions() &&
+                !currentSpin.spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot)
+            {
+                currentSpin.spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot = true;
+                return true;
+            }
+        }
     }
     return false;
 }
 bool SpinSpinner::addPositionFeature()
 {
     SpinPosition* randomPosition = pickNonConflictingPosition();
-    char randomFeature = randomPosition->pickRandomFeature();
+    char randomFeature;
+    if(adultRuleFlags.gold || adultRuleFlags.silver || adultRuleFlags.bronze) //tell pickRandomFeature to switch to 5 rev instead of 8
+        randomFeature = randomPosition->pickRandomFeature(true);
+    else
+        randomFeature = randomPosition->pickRandomFeature(false);
+
     if(randomFeature=='w' && !easyRandom::weightedTruth(WINDMILL_PROB))
         return false;
     if(currentSpin.featureUsed(randomFeature))
@@ -554,14 +632,25 @@ bool SpinSpinner::addIntermediatePosition()
 }
 bool SpinSpinner::addChangeOfDirection()
 {
-    //check for difficult variation included in upright spin (needed for change of direction feature to count)
-    if(currentSpin.baseType=='u')
+    if(currentSpin.changeDirectionFlag) //implies that change of direction has already been added to this spin
+        return false;
+    SpinPosition* lastPositionOnFirstSegment = &currentSpin.spinSegments.at(0).spinPositions.at(currentSpin.spinSegments.at(0).spinPositions.size()-1);
+    SpinPosition* firstPositionOnSecondSegment = &currentSpin.spinSegments.at(1).spinPositions.at(0);
+    if(adultRuleFlags.gold || adultRuleFlags.silver || adultRuleFlags.bronze) //adult note: doesn't need DV for change of direction to count
     {
-        if(currentSpin.spinSegments.at(0).getVariationCount()==0)
+        if(lastPositionOnFirstSegment->position=='l'||firstPositionOnSecondSegment->position=='l') //change of direction doesn't count for laybacks in adult rules for some reason? (possibily a typo or was overlooked when rule written)
             return false;
     }
-    if(currentSpin.changeDirectionFlag)
-        return false;
+    //check for difficult variation included in upright spin (needed for change of direction feature to count)
+    else
+    {
+        if(lastPositionOnFirstSegment->position=='u' &&
+            lastPositionOnFirstSegment->hasAnyVariation()==false)
+            return false;
+        if(firstPositionOnSecondSegment->position=='u' &&
+            firstPositionOnSecondSegment->hasAnyVariation()==false)
+            return false;
+    }
     if(easyRandom::range(0,1))
         currentSpin.spinSegments.at(0).swapDirection();
     else
@@ -603,6 +692,11 @@ SpinPosition* SpinSpinner::pickNonConflictingPosition()
         {
             int bulletsOnFirstSegment = currentSpin.spinSegments.at(0).getBulletCount();
             int bulletsOnSecondSegment = currentSpin.spinSegments.at(1).getBulletCount();
+            if(adultRuleFlags.active)
+            {
+                if(currentSpin.features.cleanChangeFootSpin) //awarded to second foot
+                    bulletsOnSecondSegment++;
+            }
 
             //special exception: if by accident a difficult change of position occurs on both segments then only count first one
             if(currentSpin.spinSegments.at(0).features.difficultChangeOfPosition && currentSpin.spinSegments.at(1).features.difficultChangeOfPosition)
@@ -715,6 +809,10 @@ void SpinSpinner::addARequiredBulletForLevel4()
 }
 bool SpinSpinner::checkFeatureValidity(SpinPosition* spinPosition, char featureInQuestion)
 {
+    if(adultRuleFlags.active) //if adult rules are being used redirect to below function
+        return checkFeatureValidityAdult(spinPosition,featureInQuestion);
+
+
     if(spinPosition->position=='u')
     {
         if(spinPosition->variations.empty())
@@ -735,6 +833,33 @@ bool SpinSpinner::checkFeatureValidity(SpinPosition* spinPosition, char featureI
     {
         if(spinPosition->variations.empty() && featureInQuestion=='8')
             return false;
+        if(spinPosition->parent->footness=='b' && featureInQuestion=='b') //backward outside to forward inside not allow for sit position (determined to be "too easy")
+            return false;
+    }
+    if(!easyRandom::weightedTruth(FEATURE_ON_SAME_POSITION_PROB) && !spinPosition->features.empty()) //reduce the chance of stacking features on the same position
+        return false;
+    return true;
+}
+bool SpinSpinner::checkFeatureValidityAdult(SpinPosition* spinPosition, char featureInQuestion)
+{
+    if(spinPosition->position=='u')
+    {
+        if(spinPosition->variations.empty())
+        {
+            if(featureInQuestion=='c') //coe on base upright not counted as level
+                return false;
+            if(featureInQuestion=='s') //speed on base upright not counted as level
+                return false;
+            if(featureInQuestion=='8') //8rev on base upright not counted as level
+                return false;
+            if(featureInQuestion=='b') //blade on base upright not counted as level
+                return false;
+        }
+        if(spinPosition->hasVariation('b') && featureInQuestion=='s') //speed on cross foot not counted as level
+            return false;
+    }
+    if(spinPosition->position=='s')
+    {
         if(spinPosition->parent->footness=='b' && featureInQuestion=='b') //backward outside to forward inside not allow for sit position (determined to be "too easy")
             return false;
     }
