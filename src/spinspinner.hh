@@ -42,8 +42,8 @@
 
 typedef struct AdultRuleFlags
 {
-    bool senior_junior = false;
-    bool novice_intermediate = false;
+    bool junior_senior = false;
+    bool intermediate_novice = false;
     bool gold = false;
     bool silver = false;
     bool bronze = false;

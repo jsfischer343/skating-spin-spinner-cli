@@ -25,9 +25,9 @@
 
 void validateInput(ap::argmap& args)
 {
-    //exclusive argument for adult rules
-    if(std::stoi(args["--adult-senior-junior"])+
-        std::stoi(args["--adult-novice-intermediate"])+
+    //adult rules: user can specific only one of the below
+    if(std::stoi(args["--adult-junior-senior"])+
+        std::stoi(args["--adult-intermediate-novice"])+
         std::stoi(args["--adult-gold"])+
         std::stoi(args["--adult-silver"])+
         std::stoi(args["--adult-bronze"]) > 1)
@@ -54,7 +54,15 @@ void validateInput(ap::argmap& args)
 
     //level
     bool levelValid = false;
-    std::vector<std::string> validLevels = {"0","1","2","3","4"};
+    std::vector<std::string> validLevels;
+    if(std::stoi(args["--adult-gold"]))
+        validLevels = {"0","1","2","3"};
+    else if(std::stoi(args["--adult-silver"]))
+        validLevels = {"0","1","2"};
+    else if(std::stoi(args["--adult-bronze"]))
+        validLevels = {"0","1"};
+    else
+        validLevels = {"0","1","2","3","4"};
     if(args["--level"].empty() || args["--level"]=="any")
     {
         args["--level"] = easyRandom::pickFromVector(validLevels);
@@ -98,8 +106,8 @@ void validateInput(ap::argmap& args)
 AdultRuleFlags setupAdultRuleFlags(ap::argmap& args)
 {
     AdultRuleFlags adultRuleFlags = AdultRuleFlags();
-    adultRuleFlags.senior_junior = std::stoi(args["--adult-senior-junior"]);
-    adultRuleFlags.novice_intermediate = std::stoi(args["--adult-novice-intermediate"]);
+    adultRuleFlags.junior_senior = std::stoi(args["--adult-junior-senior"]);
+    adultRuleFlags.intermediate_novice = std::stoi(args["--adult-intermediate-novice"]);
     adultRuleFlags.gold = std::stoi(args["--adult-gold"]);
     adultRuleFlags.silver = std::stoi(args["--adult-silver"]);
     adultRuleFlags.bronze = std::stoi(args["--adult-bronze"]);
@@ -114,8 +122,8 @@ int main(int argc, char* argv[]) {
     p.add("-r", "--reverse",                    "Sets default direction to clockwise instead of counter-clockwise",                             ap::mode::BOOLEAN);
     p.add("-c", "--code",                       "Prints spin as code rather than human readable",                                               ap::mode::BOOLEAN);
     p.add("-b", "--normalize",                  "Reduces strange and awkward transitions, variations, and features",                            ap::mode::BOOLEAN);
-    p.add("",   "--adult-senior-junior",        "Modifies the spin logic so spin are in accordance with the adult senior-junior rules.",        ap::mode::BOOLEAN);
-    p.add("",   "--adult-novice-intermediate",  "Modifies the spin logic so spin are in accordance with the adult novice-intermediate rules.",  ap::mode::BOOLEAN);
+    p.add("",   "--adult-junior-senior",        "Modifies the spin logic so spin are in accordance with the adult junior-senior rules.",        ap::mode::BOOLEAN);
+    p.add("",   "--adult-intermediate-novice",  "Modifies the spin logic so spin are in accordance with the adult intermediate-novice rules.",  ap::mode::BOOLEAN);
     p.add("",   "--adult-gold",                 "Modifies the spin logic so spin are in accordance with the adult gold rules.",                 ap::mode::BOOLEAN);
     p.add("",   "--adult-silver",               "Modifies the spin logic so spin are in accordance with the adult silver rules.",               ap::mode::BOOLEAN);
     p.add("",   "--adult-bronze",               "Modifies the spin logic so spin are in accordance with the adult bronze rules.",               ap::mode::BOOLEAN);

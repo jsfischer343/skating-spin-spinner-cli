@@ -204,10 +204,9 @@ void SpinSpinner::generateComboPositions()
 {
     if(currentSpin.isChangeFoot)
     {
-        bool endSpinBool = false; //randomly turned true to end the spin early (i.e. less than 6 positions)
         bool swappedFeet = false;
 
-        while(currentSpin.getTotalPositions()<6 && !endSpinBool)
+        while(currentSpin.getTotalPositions()<6)
         {
             if(!swappedFeet)
             {
@@ -224,18 +223,18 @@ void SpinSpinner::generateComboPositions()
             }
             else
             {
-                generateComboPositions_addPosition(swappedFeet); //adding to second segment
                 if(currentSpin.hasAllPrimaryPositions())
                 {
                     if(currentSpin.spinSegments.at(1).spinPositions.size()==3) //must end if on second foot and done three positions
                     {
-                        endSpinBool=true;
+                        break;
                     }
                     else if(easyRandom::weightedTruth(0.6)) //randomly decide to end second segement early (must have all primary positions)
                     {
-                        endSpinBool=true;
+                        break; //randomly end the spin early (i.e. less than 6 positions)
                     }
                 }
+                generateComboPositions_addPosition(swappedFeet); //adding to second segment
             }
         }
     }
@@ -257,7 +256,7 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
     if(currentSegment->spinPositions.size()==3 || currentSpin.spinSegments.size()>2) //If this is true then it would imply that we are trying to add a 4th basic position to the same foot OR add a third segment, which wouldn't make sense
         throw;
 
-    char nextPosition;
+    char nextPosition  = '\0';
     if(targetLevel>=1) //combo spins level 1 or higher can have a difficult change of position so the logic is more lax (i.e. there are more posibilities)
     {
         std::vector<char> validPositions = {'c','s','u'};
