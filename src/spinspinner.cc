@@ -257,13 +257,16 @@ void SpinSpinner::generateComboPositions()
             {
                 if(currentSpin.hasAllPrimaryPositions())
                 {
+                    SpinPosition* currentPosition = &currentSpin.spinSegments.at(1).spinPositions.at(currentSpin.spinSegments.at(1).spinPositions.size()-1);
                     if(currentSpin.spinSegments.at(1).spinPositions.size()==3) //must end if on second foot and done three positions
                     {
                         break;
                     }
+                    else if(currentPosition->position == 'u' || currentPosition->position == 'l') //if has all primary positions and current position is upright or layback then there isn't any more that can be added to the spin
+                        break;
                     else if(easyRandom::weightedTruth(0.6)) //randomly decide to end second segement early (must have all primary positions)
                     {
-                        break; //randomly end the spin early (i.e. less than 6 positions)
+                        break;
                     }
                 }
                 generateComboPositions_addPosition(swappedFeet); //adding to second segment
@@ -330,12 +333,12 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
     }
     else //there is a small amount of base combos that can be rolled so the logic is a bit simpler.
     {
-        if(currentSpin.spinSegments.size()==2 && currentSegment->spinPositions.size()==0) //Is change of foot spin and this is the first position
+        if(swappedFeet && currentSegment->spinPositions.size()==0) //Is change of foot spin and this is the first position on second side
         {
-            SpinSegment* previousSegment = &currentSpin.spinSegments.at(currentSpin.spinSegments.size()-2);
+            SpinSegment* previousSegment = &currentSpin.spinSegments.at(0);
             int previousIndex = previousSegment->spinPositions.size()-1;
             char previousPosition = previousSegment->spinPositions.at(previousIndex).position;
-            if(easyRandom::range(0,1)) //50/50 to repeat position on previous foot or change
+            if(easyRandom::range(0,1)) //50/50 to repeat position on previous foot
             {
                 if(previousPosition=='c')
                     nextPosition = 'c';
@@ -343,13 +346,29 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
                     nextPosition = 's';
                 else if(previousPosition=='u')
                     nextPosition = 'u';
+                else if(previousPosition=='l')
+                {
+                    if(easyRandom::range(0,1))
+                        nextPosition = 'u';
+                    else
+                        nextPosition = 'l';
+                }
             }
-            else
+            else //or change to next position
             {
                 if(previousPosition=='c')
                     nextPosition = 's';
                 else if(previousPosition=='s')
                     nextPosition = 'u';
+                else if(previousPosition=='u')
+                    nextPosition = 'u';
+                else if(previousPosition=='l')
+                {
+                    if(easyRandom::range(0,1))
+                        nextPosition = 'u';
+                    else
+                        nextPosition = 'l';
+                }
             }
         }
         else //implies that this position is on the same foot as the previous position
@@ -369,6 +388,8 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
             }
         }
     }
+    if(nextPosition=='\0') //safeguard
+        throw;
     currentSegment->spinPositions.push_back(SpinPosition(currentSegment,nextPosition));
 }
 void SpinSpinner::setRandomBaseQualities()
@@ -609,7 +630,7 @@ bool SpinSpinner::addPositionFeature()
     else
         randomFeature = randomPosition->pickRandomFeature(false);
 
-    if(randomFeature=='w' && !easyRandom::weightedTruth(WINDMILL_PROB))
+    if(randomFeature=='w' && !easyRandom::weightedTruth(WINDMILL_PROB)) //reduce chance of windmill TODO: integrate this into pickRandomFeature() (also balance other spin features
         return false;
     if(currentSpin.featureUsed(randomFeature))
         return false;
@@ -651,12 +672,12 @@ bool SpinSpinner::addChangeOfDirection()
             firstPositionOnSecondSegment->hasAnyVariation()==false)
             return false;
     }
+    if(normalize||easyRandom::range(0,1)) //Normalize note: if footness is changed during a change of direction it means you are still spinning on the same foot on the second segment. This raises concerns about if counts as a change foot spin and even just execution seems awkward.
+        currentSpin.spinSegments.at(1).swapFootness(); //makes segment 1 footness the same as segment 0
     if(easyRandom::range(0,1))
         currentSpin.spinSegments.at(0).swapDirection();
     else
         currentSpin.spinSegments.at(1).swapDirection();
-    if(easyRandom::range(0,1))
-        currentSpin.spinSegments.at(1).swapFootness();
     currentSpin.changeDirectionFlag = true;
     return true;
 }
@@ -833,7 +854,7 @@ bool SpinSpinner::checkFeatureValidity(SpinPosition* spinPosition, char featureI
     {
         if(spinPosition->variations.empty() && featureInQuestion=='8')
             return false;
-        if(spinPosition->parent->footness=='b' && featureInQuestion=='b') //backward outside to forward inside not allow for sit position (determined to be "too easy")
+        if(spinPosition->parent->footness=='b' && featureInQuestion=='c') //backward outside to forward inside not allow for sit position (determined to be "too easy")
             return false;
     }
     if(!easyRandom::weightedTruth(FEATURE_ON_SAME_POSITION_PROB) && !spinPosition->features.empty()) //reduce the chance of stacking features on the same position
@@ -860,7 +881,7 @@ bool SpinSpinner::checkFeatureValidityAdult(SpinPosition* spinPosition, char fea
     }
     if(spinPosition->position=='s')
     {
-        if(spinPosition->parent->footness=='b' && featureInQuestion=='b') //backward outside to forward inside not allow for sit position (determined to be "too easy")
+        if(spinPosition->parent->footness=='b' && featureInQuestion=='c') //backward outside to forward inside not allow for sit position (determined to be "too easy")
             return false;
     }
     if(!easyRandom::weightedTruth(FEATURE_ON_SAME_POSITION_PROB) && !spinPosition->features.empty()) //reduce the chance of stacking features on the same position
