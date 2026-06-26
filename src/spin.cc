@@ -93,7 +93,11 @@ std::string Spin::toCode() const
     resultString += "L"+std::to_string(this->level)+":";
     if(this->baseType=='2')
     {
-        resultString+="2FtUSp";
+        if(this->spinSegments.at(0).direction=='r')
+            resultString+="cc";
+        else
+            resultString+="c";
+        resultString+="[2FtUSp]";
     }
     else
     {
@@ -127,6 +131,15 @@ std::string Spin::toCode() const
             resultString += "DE";
         if(this->features.difficultExit)
             resultString += "DX";
+
+        //adult specific features
+        if(this->features.cleanChangeFootSpin||this->features.allThreeBasicPositionsAnywhere)
+            resultString += "CBP";
+        else if(this->isChangeFoot)
+        {
+            if(this->spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot)
+                resultString += "CBP2F";
+        }
     }
 
     return resultString;
@@ -138,7 +151,11 @@ std::string Spin::prettyPrint() const
     resultString += "Level "+std::to_string(this->level)+": ";
     if(this->baseType=='2')
     {
-        resultString+="2FtUSp";
+        if(this->spinSegments.at(0).direction=='r')
+            resultString+="(ccw)";
+        else
+            resultString+="(cc)";
+        resultString+="[ 2 foot upright ]";
     }
     else
     {
@@ -176,6 +193,15 @@ std::string Spin::prettyPrint() const
                 resultString += " with difficult entrance";
             if(this->features.difficultExit)
                 resultString += " with difficult exit";
+        }
+
+        //adult specific features
+        if(this->features.cleanChangeFootSpin||this->features.allThreeBasicPositionsAnywhere)
+            resultString += " with clean basic positions";
+        else if(this->isChangeFoot)
+        {
+            if(this->spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot)
+                resultString += " with clean basic positions all on second foot";
         }
     }
 

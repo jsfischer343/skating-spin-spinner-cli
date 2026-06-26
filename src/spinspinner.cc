@@ -147,6 +147,17 @@ void SpinSpinner::generateSpinInOnePosition()
     {
         currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
         currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,otherFootness));
+
+
+        //adult specific feature
+        if(adultRuleFlags.active && targetLevel>0)
+        {
+            if((currentSpin.baseType=='c'||currentSpin.baseType=='s') && easyRandom::weightedTruth(ADULT_CLEAN_CHANGEFOOT)) //(F)CCSp or (F)CSSp only
+            {
+                currentSpin.level++;
+                currentSpin.features.cleanChangeFootSpin = true;
+            }
+        }
     }
     else
         currentSpin.spinSegments.push_back(SpinSegment(defaultDirection,startingFootness));
@@ -158,7 +169,7 @@ void SpinSpinner::generateSpinInOnePosition()
     }
 
     //add levels
-    for(int i=0;i<targetLevel;i++)
+    for(int i=0;i<targetLevel-currentSpin.features.cleanChangeFootSpin;i++)
     {
         if(!addLevel())
             throw;
@@ -177,7 +188,7 @@ void SpinSpinner::generateCombo()
 {
     //pick first position
     char randomStartPosition;
-    if(targetLevel<1)
+    if(targetLevel<1 || (adultRuleFlags.active && targetLevel<2))
         randomStartPosition = 'c';
     else
         randomStartPosition = easyRandom::pickFromVectorWeighted(std::vector<int>{'c','s','u'},std::vector<double>{COMBO_START_CAMEL_PROB,COMBO_START_SIT_PROB,COMBO_START_UPRIGHT_PROB});
@@ -218,6 +229,7 @@ void SpinSpinner::generateCombo()
     //Logic to add the rest of the positions
     generateComboPositions();
 
+    int levelOffset = 0;
     //check for difficult change of position
     bool hasDifficultChangeOfPosition = false;
     if(currentSpin.hasDifficultChangeOfPosition())
@@ -225,8 +237,40 @@ void SpinSpinner::generateCombo()
         currentSpin.level++;
         hasDifficultChangeOfPosition = true;
     }
+
+    //adult specific features
+    if(adultRuleFlags.active && targetLevel>0)
+    {
+        if(adultRuleFlags.gold || adultRuleFlags.silver || adultRuleFlags.bronze)
+        {
+            if(currentSpin.hasAllPrimaryPositions() && easyRandom::weightedTruth(ADULT_CLEAN_COMBO))
+            {
+                currentSpin.level++;
+                currentSpin.features.allThreeBasicPositionsAnywhere = true;
+            }
+        }
+        else if(currentSpin.isChangeFoot)
+        {
+            if(currentSpin.spinSegments.at(1).hasAllPrimaryPositions())
+            {
+                currentSpin.level++;
+                currentSpin.spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot = true;
+            }
+        }
+    }
+
+    if(hasDifficultChangeOfPosition)
+        levelOffset++;
+    if(currentSpin.features.allThreeBasicPositionsAnywhere)
+        levelOffset++;
+    if(currentSpin.isChangeFoot)
+    {
+        if(currentSpin.spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot)
+            levelOffset++;
+    }
+
     //add levels
-    for(int i=0;i<targetLevel-hasDifficultChangeOfPosition;i++) //difficult change of position counts as a level, so addLevel is called one less time
+    for(int i=0;i<targetLevel-levelOffset;i++) //difficult change of position counts as a level, so addLevel is called one less time
     {
         if(!addLevel())
             throw;
@@ -245,7 +289,8 @@ void SpinSpinner::generateComboPositions()
             if(!swappedFeet)
             {
                 //after each position, randomly decide if a change foot will take place early
-                if(easyRandom::weightedTruth(0.4) || currentSpin.spinSegments.at(0).spinPositions.size()==3) //if already at three positions on first segement then must switch to next spin segement (i.e. change feet)
+                if(easyRandom::weightedTruth(0.4)||currentSpin.spinSegments.at(0).spinPositions.size()==3|| //if already at three positions on first segement then must switch to next spin segement (i.e. change feet)
+                    ((adultRuleFlags.junior_senior||adultRuleFlags.intermediate_novice)&&easyRandom::weightedTruth(0.4))) //OR  adult specific: increase chance of swapping feet for adult junior-senior and adult intermediate-novice due to additional feature available
                 {
                     swappedFeet = true;
                     generateComboPositions_addPosition(swappedFeet);
@@ -294,7 +339,7 @@ void SpinSpinner::generateComboPositions_addPosition(bool swappedFeet)
         throw;
 
     char nextPosition  = '\0';
-    if(targetLevel>=1) //combo spins level 1 or higher can have a difficult change of position so the logic is more lax (i.e. there are more posibilities)
+    if(targetLevel>=1 && (!adultRuleFlags.active||targetLevel>=2)) //combo spins level 1 or higher can have a difficult change of position so the logic is more lax (i.e. there are more posibilities)
     {
         std::vector<char> validPositions = {'c','s','u'};
         std::vector<char> usedPositions = currentSegment->getUsedPositions();
@@ -557,10 +602,6 @@ bool SpinSpinner::addSpinFeature()
     int tempUpperRandomRange = 2;
     if(currentSpin.isChangeFoot)
         tempLowerRandomRange--;
-    if(adultRuleFlags.active)
-    {
-        tempUpperRandomRange++;
-    }
 
 
     randomSelect = easyRandom::range(tempLowerRandomRange,tempUpperRandomRange);
@@ -587,37 +628,6 @@ bool SpinSpinner::addSpinFeature()
         {
             currentSpin.features.difficultExit = true;
             return true;
-        }
-    }
-
-    //TODO: phase out this section and add this check to spin building phase
-    //adult rules: logic for additional spin features for adults below
-    else if(randomSelect==3)
-    {
-
-        if((currentSpin.baseType=='c'||currentSpin.baseType=='s') && currentSpin.isChangeFoot) //(F)CCSp or (F)CSSp only
-        {
-            if(currentSpin.features.cleanChangeFootSpin)
-                return false;
-            currentSpin.features.cleanChangeFootSpin = true;
-            return true;
-        }
-        if(adultRuleFlags.gold || adultRuleFlags.silver || adultRuleFlags.bronze)
-        {
-            if(currentSpin.hasAllPrimaryPositions() && !currentSpin.features.allThreeBasicPositionsAnywhere)
-            {
-                currentSpin.features.allThreeBasicPositionsAnywhere = true;
-                return true;
-            }
-        }
-        else if(currentSpin.baseType=='k' && currentSpin.isChangeFoot) //TODO: maybe integrate this into spin structure building logic so that if three basic positions on the second foot occurs naturally then it will add a level automatically
-        {
-            if(currentSpin.spinSegments.at(1).hasAllPrimaryPositions() &&
-                !currentSpin.spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot)
-            {
-                currentSpin.spinSegments.at(1).features.allThreeBasicPositionsOnSecondFoot = true;
-                return true;
-            }
         }
     }
     return false;

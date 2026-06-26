@@ -31,8 +31,9 @@
 #define FEATURE_ON_SAME_POSITION_PROB 0.05
 #define VARIATION_ON_SAME_POSITION_PROB 0.8
 
-//Misc probabilities
-#define WINDMILL_PROB 0.3
+//Adult specific probabilities (note:
+#define ADULT_CLEAN_CHANGEFOOT 0.5 //if the spin is (F)CCSp or (F)CSSp this is the chance that it will add to the level (basic position on both sides it expected to be achieved by skater)
+#define ADULT_CLEAN_COMBO 0.5 //if the spin is (F)CoSp or (F)CCoSp this is the chance that it will add a level (basic position on all three primary positions is expected of the skater)
 
 #include <algorithm>
 #include <string>
@@ -42,7 +43,7 @@
 
 typedef struct AdultRuleFlags
 {
-    bool active = false;
+    bool active = false; //should be set true if any of the below are true
     bool junior_senior = false;
     bool intermediate_novice = false;
     bool gold = false;

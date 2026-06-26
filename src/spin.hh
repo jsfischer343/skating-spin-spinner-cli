@@ -23,8 +23,8 @@ class Spin
             bool difficultEntrance = false;
             bool difficultExit = false;
             //adult specific:
-            bool cleanChangeFootSpin = false; //awarded to second foot
-            bool allThreeBasicPositionsAnywhere = false; //adult silver & bronze only
+            bool cleanChangeFootSpin = false; //awarded to second foot, (F)CCSp and (F)CSSp only
+            bool allThreeBasicPositionsAnywhere = false; //adult silver & bronze only, for (F)CoSp and (F)CCoSp only
         } SpinFeatures;
         SpinFeatures features;
 
