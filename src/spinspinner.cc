@@ -160,7 +160,8 @@ void SpinSpinner::generateSpinInOnePosition()
     //add levels
     for(int i=0;i<targetLevel;i++)
     {
-        addLevel();
+        if(!addLevel())
+            throw;
     }
 
     //record spin
@@ -227,7 +228,8 @@ void SpinSpinner::generateCombo()
     //add levels
     for(int i=0;i<targetLevel-hasDifficultChangeOfPosition;i++) //difficult change of position counts as a level, so addLevel is called one less time
     {
-        addLevel();
+        if(!addLevel())
+            throw;
     }
 
     spinHistory.push_back(currentSpin);
@@ -435,36 +437,14 @@ void SpinSpinner::setRandomBaseQualities()
 
 
 }
-void SpinSpinner::addLevel()
+bool SpinSpinner::addLevel()
 {
+    if(currentSpin.level>=4)
+        return false;
     //adult rules: for bronze "all three basic positions is the only measure for getting level 1 in combo spins"
-    if(adultRuleFlags.bronze && currentSpin.baseType == 'k')
+    else if(adultRuleFlags.bronze && currentSpin.baseType == 'k')
         currentSpin.features.allThreeBasicPositionsAnywhere = true;
-    else if(currentSpin.level==0)
-    {
-        int randomSelect = pickRandomBulletType();
-        if(randomSelect==0)
-        {
-            addVariation();
-        }
-        else if(randomSelect==1) //add spin/segment feature
-        {
-            addSpinFeature();
-        }
-        else if(randomSelect==2)
-        {
-            addPositionFeature();
-        }
-        else if(randomSelect==3) //only for combos (safeguarded by pickRandomBulletType())
-        {
-            addIntermediatePosition();
-        }
-        else if(randomSelect==4) //only for change foot spins (safeguarded by pickRandomBulletType())
-        {
-            addChangeOfDirection();
-        }
-    }
-    else //need to check for conflicts with features already in the spin
+    else
     {
         if(currentSpin.level==3 && missingBulletForLevel4() && adultRuleFlags.intermediate_novice==false) //if missing the required bullets for level 4 and the next level is 4 then add from the required level 4 bullets (note: adult levels intermediate-novice doesn't need a required bullet to get level 4)
         {
@@ -472,8 +452,11 @@ void SpinSpinner::addLevel()
         }
         else
         {
+            int count = 0;
             while(true) //keep looping until the rolled "spin addition" (variation/features) doesn't conflict with any other additions (lazy implementation)
             {
+                if(count>100)
+                    return false; //after 100 iterations, assume there is no valid bullet that can be added
                 int randomSelect = pickRandomBulletType();
                 if(randomSelect==0)
                 {
@@ -512,10 +495,12 @@ void SpinSpinner::addLevel()
                 }
                 else
                     throw; //implies that randomSelect is outside of possible spin additions (this would be a bug)
+                count++;
             }
         }
     }
     currentSpin.level++;
+    return true;
 }
 bool SpinSpinner::addVariation()
 {
@@ -542,6 +527,20 @@ bool SpinSpinner::addVariation()
             {
                 if(randomPosition->addVariation(randomVariation,normalize))
                 {
+                    //*special exception: used to balance out lack of 8rev features in sit (and combo) spins (due to the requirment that the position have a DV)
+                    if(randomPosition->position=='s' && randomPosition->hasAnyFeature())
+                    {
+                        if((targetLevel==2 && easyRandom::weightedTruth(0.6)) ||
+                            (targetLevel==3 && easyRandom::weightedTruth(0.2)))
+                        {
+                            if(adultRuleFlags.gold || adultRuleFlags.silver || adultRuleFlags.bronze)
+                                randomPosition->features.at(0) = '5';
+                            else
+                                randomPosition->features.at(0) = '8';
+                        }
+                    }
+                    //*
+
                     if(currentSpin.hasTwoVariations())
                         currentSpin.twoVariationsFlag = true;
                     return true;
@@ -591,9 +590,11 @@ bool SpinSpinner::addSpinFeature()
         }
     }
 
+    //TODO: phase out this section and add this check to spin building phase
     //adult rules: logic for additional spin features for adults below
     else if(randomSelect==3)
     {
+
         if((currentSpin.baseType=='c'||currentSpin.baseType=='s') && currentSpin.isChangeFoot) //(F)CCSp or (F)CSSp only
         {
             if(currentSpin.features.cleanChangeFootSpin)
@@ -630,8 +631,6 @@ bool SpinSpinner::addPositionFeature()
     else
         randomFeature = randomPosition->pickRandomFeature(false);
 
-    if(randomFeature=='w' && !easyRandom::weightedTruth(WINDMILL_PROB)) //reduce chance of windmill TODO: integrate this into pickRandomFeature() (also balance other spin features
-        return false;
     if(currentSpin.featureUsed(randomFeature))
         return false;
     if(!checkFeatureValidity(randomPosition,randomFeature))
@@ -684,20 +683,43 @@ bool SpinSpinner::addChangeOfDirection()
 int SpinSpinner::pickRandomBulletType()
 {
     //0: difficult variation, 1: spin feature, 2: position feature, 3: intermediate position 4: change of direction
+    int select = -1;
+    std::vector<int> selectFromVector;
+    std::vector<double> selectVectorWeights;
+
+    /*--TEMP--
+    //special exception: used to balance out lack of 8rev features in level 2 sit (and combo) spins (due to the requirment that the position have a DV)
+    if((currentSpin.baseType=='s'||currentSpin.baseType=='k') && (targetLevel==2 && currentSpin.level==0)) //if first bullet of level 2 sit or combo
+        return 0; //select a DV for first bullet
+        */
+
     if(currentSpin.baseType=='k')
     {
         if(currentSpin.isChangeFoot)
-            return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3,4},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB,ADD_CHANGE_OF_DIRECTION_PROB});
+        {
+            selectFromVector = std::vector<int>{0,1,2,3,4};
+            selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB,ADD_CHANGE_OF_DIRECTION_PROB};
+        }
         else
-            return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,3},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB});
+        {
+            selectFromVector = std::vector<int>{0,1,2,3};
+            selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_INTERMEDIATE_POSITION_PROB};
+        }
     }
     else
     {
         if(currentSpin.isChangeFoot)
-            return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2,4},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_CHANGE_OF_DIRECTION_PROB});
+        {
+            selectFromVector = std::vector<int>{0,1,2,4};
+            selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB,ADD_CHANGE_OF_DIRECTION_PROB};
+        }
         else
-            return easyRandom::pickFromVectorWeighted(std::vector<int>{0,1,2},std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB});
+        {
+            selectFromVector = std::vector<int>{0,1,2};
+            selectVectorWeights = std::vector<double>{ADD_VARIATION_PROB,ADD_SPIN_FEATURE_PROB,ADD_POSITION_FEATURE_PROB};
+        }
     }
+    return easyRandom::pickFromVectorWeighted(selectFromVector, selectVectorWeights);
 }
 SpinPosition* SpinSpinner::pickNonConflictingPosition()
 {
@@ -850,13 +872,15 @@ bool SpinSpinner::checkFeatureValidity(SpinPosition* spinPosition, char featureI
         if(spinPosition->hasVariation('b') && featureInQuestion=='s') //speed on cross foot not counted as level
             return false;
     }
-    if(spinPosition->position=='s')
+    else if(spinPosition->position=='s')
     {
         if(spinPosition->variations.empty() && featureInQuestion=='8')
             return false;
         if(spinPosition->parent->footness=='b' && featureInQuestion=='c') //backward outside to forward inside not allow for sit position (determined to be "too easy")
             return false;
     }
+    if(spinPosition->position!='c' && featureInQuestion=='w')
+        return false;
     if(!easyRandom::weightedTruth(FEATURE_ON_SAME_POSITION_PROB) && !spinPosition->features.empty()) //reduce the chance of stacking features on the same position
         return false;
     return true;
@@ -879,11 +903,13 @@ bool SpinSpinner::checkFeatureValidityAdult(SpinPosition* spinPosition, char fea
         if(spinPosition->hasVariation('b') && featureInQuestion=='s') //speed on cross foot not counted as level
             return false;
     }
-    if(spinPosition->position=='s')
+    else if(spinPosition->position=='s')
     {
         if(spinPosition->parent->footness=='b' && featureInQuestion=='c') //backward outside to forward inside not allow for sit position (determined to be "too easy")
             return false;
     }
+    if(spinPosition->position!='c' && featureInQuestion=='w')
+        return false;
     if(!easyRandom::weightedTruth(FEATURE_ON_SAME_POSITION_PROB) && !spinPosition->features.empty()) //reduce the chance of stacking features on the same position
         return false;
     return true;

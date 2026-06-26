@@ -2,7 +2,7 @@
 #ifndef SPINSPINNER_HH_
 #define SPINSPINNER_HH_
 
-//Probablities for base spin qualities (think spin code)
+//Probabilities for base spin qualities (think spin code)
 #define CAMEL_CHANGEFOOTSPIN_PROB 0.5
 #define CAMEL_FLYINGSPIN_PROB 0.5
 #define SIT_CHANGEFOOTSPIN_PROB 0.5
@@ -20,14 +20,14 @@
 #define COMBO_START_UPRIGHT_PROB 0.04
 #define COMBO_SWAP_UPRIGHT_FOR_LAYBACK 0.15
 
-//Probablities for spin bullets
+//Probabilities for spin bullets
 #define ADD_VARIATION_PROB 0.32
 #define ADD_SPIN_FEATURE_PROB 0.19
 #define ADD_POSITION_FEATURE_PROB 0.23
 #define ADD_INTERMEDIATE_POSITION_PROB 0.13 //only affects combo spins
 #define ADD_CHANGE_OF_DIRECTION_PROB 0.13
 
-//Probablitiy of allowing stacking features or variations on same position
+//Probability of allowing stacking features or variations on same position
 #define FEATURE_ON_SAME_POSITION_PROB 0.05
 #define VARIATION_ON_SAME_POSITION_PROB 0.8
 
@@ -75,7 +75,7 @@ class SpinSpinner
 
         void setRandomBaseQualities(); //selects base qualities for the spin (think spin code)
         //main logic for adding levels
-        void addLevel();
+        bool addLevel();
             bool addVariation();
             bool addSpinFeature();
             bool addPositionFeature();

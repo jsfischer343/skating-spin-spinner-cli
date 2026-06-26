@@ -109,6 +109,12 @@ bool SpinPosition::hasAnyVariation() const
         return true;
     return false;
 }
+bool SpinPosition::hasAnyFeature() const
+{
+    if(features.size()>0)
+        return true;
+    return false;
+}
 char SpinPosition::pickRandomFeature(bool isRev5) const
 {
     std::vector<char> validFeatures;
@@ -123,10 +129,26 @@ char SpinPosition::pickRandomFeature(bool isRev5) const
     std::sort(validFeatures.begin(),validFeatures.end());
     std::sort(usedFeatures.begin(),usedFeatures.end());
     std::set_difference(validFeatures.begin(),validFeatures.end(),usedFeatures.begin(),usedFeatures.end(),std::back_inserter(unusedFeatures));
+
+    std::vector<double> selectionWeights;
+    for(int i=0;i<unusedFeatures.size();i++)
+    {
+        if(unusedFeatures.at(i)=='b')
+            selectionWeights.push_back(POS_FEATURE_BLADE_PROB);
+        else if(unusedFeatures.at(i)=='c')
+            selectionWeights.push_back(POS_FEATURE_COE_PROB);
+        else if(unusedFeatures.at(i)=='j')
+            selectionWeights.push_back(POS_FEATURE_JUMP_PROB);
+        else if(unusedFeatures.at(i)=='5'||unusedFeatures.at(i)=='8')
+            selectionWeights.push_back(POS_FEATURE_REV_PROB);
+        else if(unusedFeatures.at(i)=='s')
+            selectionWeights.push_back(POS_FEATURE_SPEED_PROB);
+    }
+
     if(unusedFeatures.empty())
         return -1;
     else
-        return easyRandom::pickFromVector(unusedFeatures);
+        return easyRandom::pickFromVectorWeighted(unusedFeatures,selectionWeights);
 }
 char SpinPosition::pickRandomVariation() const
 {
@@ -142,7 +164,10 @@ char SpinPosition::pickRandomVariation() const
     }
     else if(position=='u')
     {
-        validVariations = {'s','f','t','m'}; //does a headless spin count as upright up?
+        if(this->hasVariation('s')||this->hasVariation('t')) //note: straight and sideways count as the same DV in upright spins
+            validVariations = {'f','m'};
+        else
+            validVariations = {'s','f','t','m'};
     }
     else if(position=='l')
     {

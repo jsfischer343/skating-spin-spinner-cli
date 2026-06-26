@@ -7,6 +7,13 @@
 #include <vector>
 #include "easyrandom.hh"
 
+//Position feature probabilities
+#define POS_FEATURE_BLADE_PROB 0.175
+#define POS_FEATURE_COE_PROB 0.2
+#define POS_FEATURE_JUMP_PROB 0.2
+#define POS_FEATURE_REV_PROB 0.25
+#define POS_FEATURE_SPEED_PROB 0.175
+
 class SpinSegment; //forward declartion for creating valid reference
 
 class SpinPosition
@@ -32,6 +39,7 @@ class SpinPosition
         bool hasVariation(char variation) const;
         bool hasFeature(char feature) const;
         bool hasAnyVariation() const;
+        bool hasAnyFeature() const;
         char pickRandomFeature(bool isRev5) const;
         char pickRandomVariation() const;
 
